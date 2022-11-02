@@ -3,15 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace fourtynine;
 
-[ApiController]
-[Route("api/[controller]")]
-[Produces(MediaTypeNames.Application.Json)]
-[Consumes(MediaTypeNames.Application.Json)]
-public abstract class ApiControllerBase : Controller
-{
-}
-
-public class StuffController : ApiControllerBase
+[ApiControllerConvention]
+public class StuffController : Controller
 {
     private LinkGenerator _linkGenerator;
 
