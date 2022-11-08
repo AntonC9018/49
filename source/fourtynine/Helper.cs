@@ -23,10 +23,18 @@ public static class RoutingHelper
     }
 }
 
+public class ApiRoute : RouteAttribute
+{
+    public ApiRoute(string template = "api/[controller]") : base(template)
+    {
+    }
+}
+
+// Enables API conventions, like [ApiController],
+// but also applies the default content types.
 public class ApiControllerConventionAttribute : Attribute,
     IControllerModelConvention,
-    IApiBehaviorMetadata,
-    IRouteTemplateProvider
+    IApiBehaviorMetadata
 {
     public void Apply(ControllerModel controller)
     {
@@ -35,11 +43,5 @@ public class ApiControllerConventionAttribute : Attribute,
         
         if (controller.Filters.All(f => f is not IResultFilter))
             controller.Filters.Add(new ProducesAttribute(MediaTypeNames.Application.Json));
-
-        Name ??= controller.ControllerName;
     }
-
-    public string? Template { get; set; } = "api/[controller]";
-    public int? Order { get; set; }
-    public string? Name { get; set; }
 }
