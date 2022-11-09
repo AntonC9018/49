@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
+    <link rel="icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - fourtynine</title>
 </head>
@@ -90,5 +91,16 @@
         </main>
     </div>
     @await RenderSectionAsync("Scripts", required: false)
+
+    @* <environment include="Development"> *@
+    @*     <script type="module" src="~/@@vite/client"></script> *@
+    @*     <script type="module" src="~/src/main.ts"></script> *@
+    @* </environment> *@
+
+    <environment exclude="Development">
+        <script type="module" asp-src-include="~/StaticFiles/**/index.*.js"></script>
+        <script type="module" asp-src-include="~/StaticFiles/**/vendor.*.js"></script>
+        <link rel="stylesheet" asp-href-include="~/StaticFiles/**/index.*.css">
+    </environment>
 </body>
 </html>
