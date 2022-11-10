@@ -66,6 +66,7 @@ class Build : NukeBuild
             var project49 = Solution.fourtynine; 
             DotNetRestore(_ => _
                 .SetProjectFile(project49));
+            Npm("install", workingDirectory: ViteDirectory);
         });
 
     Target Compile => _ => _
@@ -84,7 +85,7 @@ class Build : NukeBuild
         {
             var outputAppDirectory = OutputDirectory / "app";
             EnsureCleanDirectory(outputAppDirectory);
-            
+
             DotNetPublish(_ => _
                 .SetProject(Solution.fourtynine)
                 .SetConfiguration(Configuration)
@@ -92,7 +93,6 @@ class Build : NukeBuild
                 .SetProcessWorkingDirectory(Solution.Directory)
                 .EnableNoRestore());
 
-            Npm("install", workingDirectory: ViteDirectory);
             Npm("run build", workingDirectory: ViteDirectory);
             
             CopyDirectoryRecursively(ViteOutputDirectory, outputAppDirectory / "StaticFiles");
