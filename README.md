@@ -9,6 +9,10 @@
 To build for production, do `build publish` or `nuke publish`, which calls the same nuke target.
 The output will be in the `output/app` directory.
 
+For development:
+- Start up the vite server in the folder `source/fourtynine.ClientApp` with `npm run dev`;
+- Start up the ASP.NET backend with hot reloading in `source/fourtynine` with `dotnet watch`.
+
 
 Tech used:
 
