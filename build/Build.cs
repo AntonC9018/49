@@ -38,6 +38,9 @@ class Build : NukeBuild
     readonly Solution Solution;
     
     AbsolutePath OutputDirectory => Solution.Directory / "output";
+    AbsolutePath ViteDirectory => Solution.Directory / "source" / "fourtynine.ClientApp";
+    AbsolutePath ViteOutputDirectory => ViteDirectory / "dist";
+
 
     Target Clean => _ => _
         .Before(Restore)
@@ -45,7 +48,15 @@ class Build : NukeBuild
         {
             var project49 = Solution.fourtynine;
             DotNetClean(_ => _.SetProject(project49));
-            EnsureCleanDirectory(OutputDirectory);
+            DeleteDirectory(OutputDirectory);
+
+            var certificatePaths = CertificatePaths.Create(Solution.Directory);
+            DeleteFile(certificatePaths.Certificate);
+            DeleteFile(certificatePaths.Key);
+            DotNet("dev-certs https --clean");
+
+            DeleteDirectory(ViteOutputDirectory);
+            DeleteDirectory(ViteDirectory / "node_modules");
         });
 
     Target Restore => _ => _
@@ -63,7 +74,8 @@ class Build : NukeBuild
         {
             DotNetBuild(_ => _
                 .SetProjectFile(Solution.fourtynine)
-                .SetConfiguration(Configuration));
+                .SetConfiguration(Configuration)
+                .EnableNoRestore());
         });
 
     Target Publish => _ => _
@@ -71,17 +83,30 @@ class Build : NukeBuild
         .Executes(() =>
         {
             var outputAppDirectory = OutputDirectory / "app";
-            var viteProjectDirectory = Solution.Directory / "source" / "fourtynine.ClientApp";
-            var viteResultsDirectory = viteProjectDirectory / "dist";
             EnsureCleanDirectory(outputAppDirectory);
+            
             DotNetPublish(_ => _
                 .SetProject(Solution.fourtynine)
                 .SetConfiguration(Configuration)
                 .SetOutput(outputAppDirectory)
-                .SetProcessWorkingDirectory(Solution.Directory));
-            Npm("run build", workingDirectory: viteProjectDirectory);
-            CopyDirectoryRecursively(viteResultsDirectory, outputAppDirectory / "StaticFiles");
+                .SetProcessWorkingDirectory(Solution.Directory)
+                .EnableNoRestore());
+
+            Npm("install", workingDirectory: ViteDirectory);
+            Npm("run build", workingDirectory: ViteDirectory);
+            
+            CopyDirectoryRecursively(ViteOutputDirectory, outputAppDirectory / "StaticFiles");
         });
+
+    record struct CertificatePaths(AbsolutePath Certificate, AbsolutePath Key)
+    {
+        public static CertificatePaths Create(AbsolutePath directory)
+        {
+            return new CertificatePaths(directory / "fourtynine.pem", directory / "fourtynine.key");
+        }
+
+        public bool Exist => Certificate.FileExists() && Key.FileExists();
+    };
 
     Target GenerateSSLKeysDevelopment => _ => _
         .Executes(() =>
@@ -98,26 +123,24 @@ class Build : NukeBuild
                 aspnetcoreHttps = (AbsolutePath) appdata / "ASP.NET" / "https";
             }
             
-            var certFilePath = Solution.Directory / "fourtynine.pem";
-            var keyFilePath = Solution.Directory / "fourtynine.key";
+            var copies = CertificatePaths.Create(Solution.Directory);
+            var sources = CertificatePaths.Create(aspnetcoreHttps);
 
-            if (!File.Exists(certFilePath) || !File.Exists(keyFilePath))
+            if (sources.Exist)
             {
-                string sourceCertPath = aspnetcoreHttps / "fourtynine.pem";
-                string sourceKeyFilePath = aspnetcoreHttps / "fourtynine.key";
-                if (File.Exists(sourceCertPath) && File.Exists(sourceKeyFilePath))
+                if (!copies.Exist)
                 {
-                    File.Copy(sourceCertPath, certFilePath!);
-                    File.Copy(sourceKeyFilePath, keyFilePath!);
+                    CopyFile(sources.Certificate, copies.Certificate);
+                    CopyFile(sources.Key, copies.Key);
                 }
-                else
+            }
+            else
+            {
+                DotNetDevCertsHttpsCreate(new()
                 {
-                    DotNetDevCertsHttpsCreate(new()
-                    {
-                        ExportPath = certFilePath,
-                        NoPassword = true,
-                    });
-                }
+                    ExportPath = copies.Certificate,
+                    NoPassword = true,
+                });
             }
 
             DotNet("dev-certs https --trust");
