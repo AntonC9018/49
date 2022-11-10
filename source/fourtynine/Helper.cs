@@ -5,10 +5,9 @@ using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
-using Microsoft.AspNetCore.SpaServices;
-using Microsoft.AspNetCore.SpaServices.StaticFiles;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Primitives;
+using Yarp.ReverseProxy.Configuration;
 
 namespace fourtynine;
 
@@ -50,16 +49,17 @@ public class ApiControllerConventionAttribute : Attribute,
     }
 }
 
-public static class ViteHelper
-{
-    // The server has to be run manually in the right folder.
-    // https://github.com/MakotoAtsu/AspNetCore_Vite_Template/blob/master/AspNetCore_Vite_Starter/Net6_MinimalAPI_And_Vite/ViteHelper.cs
-    public static void UseViteDevelopmentServer(this ISpaBuilder spa, int? port = null)
-    {
-        int port_ = port.HasValue ? port.Value : 5173;
-        spa.Options.DevServerPort = port_;
-        
-        var devServerEndpoint = new Uri($"https://localhost:{port_}");
-        spa.UseProxyToSpaDevelopmentServer(devServerEndpoint);
-    }
-}
+// Not gonna work, because there is stuff in /public which doesn't end up in the manifest.
+// public class ViteManifestReverseProxyFilter : IProxyConfigFilter
+// {
+//     private HashSet<string> ManifestKeys;
+//     
+//     public ValueTask<ClusterConfig> ConfigureClusterAsync(ClusterConfig cluster, CancellationToken cancel)
+//     {
+//         return new(cluster);
+//     }
+//
+//     public ValueTask<RouteConfig> ConfigureRouteAsync(RouteConfig route, ClusterConfig? cluster, CancellationToken cancel)
+//     {
+//     }
+// } 

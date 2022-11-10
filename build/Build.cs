@@ -1,5 +1,7 @@
 using System;
+using System.IO;
 using System.Linq;
+using CliWrap;
 using Microsoft.Build.Tasks;
 using Nuke.Common;
 using Nuke.Common.CI;
@@ -17,6 +19,7 @@ using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using static Nuke.Common.Tools.MSBuild.MSBuildTasks;
 using static Nuke.Common.Tools.Npm.NpmTasks;
+using static CustomToolWrappers.DotNetDevCertsHttpsSettings;
 
 class Build : NukeBuild
 {
@@ -46,6 +49,7 @@ class Build : NukeBuild
         });
 
     Target Restore => _ => _
+        .DependsOn(GenerateSSLKeysDevelopment)
         .Executes(() =>
         {
             var project49 = Solution.fourtynine; 
@@ -67,7 +71,7 @@ class Build : NukeBuild
         .Executes(() =>
         {
             var outputAppDirectory = OutputDirectory / "app";
-            var viteProjectDirectory = Solution.Directory / "source" / "fourtynine.vite";
+            var viteProjectDirectory = Solution.Directory / "source" / "fourtynine.ClientApp";
             var viteResultsDirectory = viteProjectDirectory / "dist";
             EnsureCleanDirectory(outputAppDirectory);
             DotNetPublish(_ => _
@@ -79,4 +83,43 @@ class Build : NukeBuild
             CopyDirectoryRecursively(viteResultsDirectory, outputAppDirectory / "StaticFiles");
         });
 
+    Target GenerateSSLKeysDevelopment => _ => _
+        .Executes(() =>
+        {
+            AbsolutePath aspnetcoreHttps;
+            string appdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            if (string.IsNullOrEmpty(appdata))
+            {
+                aspnetcoreHttps = (AbsolutePath) Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) 
+                    / ".aspnetcore" / "https";
+            }
+            else
+            {
+                aspnetcoreHttps = (AbsolutePath) appdata / "ASP.NET" / "https";
+            }
+            
+            var certFilePath = Solution.Directory / "fourtynine.pem";
+            var keyFilePath = Solution.Directory / "fourtynine.key";
+
+            if (!File.Exists(certFilePath) || !File.Exists(keyFilePath))
+            {
+                string sourceCertPath = aspnetcoreHttps / "fourtynine.pem";
+                string sourceKeyFilePath = aspnetcoreHttps / "fourtynine.key";
+                if (File.Exists(sourceCertPath) && File.Exists(sourceKeyFilePath))
+                {
+                    File.Copy(sourceCertPath, certFilePath!);
+                    File.Copy(sourceKeyFilePath, keyFilePath!);
+                }
+                else
+                {
+                    DotNetDevCertsHttpsCreate(new()
+                    {
+                        ExportPath = certFilePath,
+                        NoPassword = true,
+                    });
+                }
+            }
+
+            DotNet("dev-certs https --trust");
+        });
 }
