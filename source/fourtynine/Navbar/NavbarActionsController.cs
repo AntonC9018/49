@@ -14,8 +14,8 @@ public class NavbarActionsController : Controller
     }
 
     [HttpGet]
-    public IEnumerable<NavbarAction> GetActions()
+    public ActionResult<IEnumerable<NavbarAction>> GetActions()
     {
-        return _navbarActions.NavbarActions;
+        return Ok(_navbarActions.NavbarActions);
     }
 }
