@@ -27,7 +27,7 @@ public class StuffController : Controller
             Name = "Frank",
             Path = _linkGenerator.GetPathByAction(
                 nameof(StuffController.GetStuff),
-                ControllerName(nameof(StuffController)))
+                nameof(StuffController).ControllerName())
         });
     }
 }

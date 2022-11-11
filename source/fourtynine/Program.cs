@@ -1,5 +1,6 @@
 using System.Net.Mime;
 using fourtynine;
+using fourtynine.Navbar;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,10 +23,12 @@ if (isDevelopment)
     proxy.LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 }
 
+builder.Services.AddSingleton<INavbarActionsService, NavbarActionsService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (isDevelopment)
+if (!isDevelopment)
 {
     app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
