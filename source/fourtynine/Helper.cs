@@ -6,10 +6,6 @@ using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.Mvc.Routing;
-using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Primitives;
-using Yarp.ReverseProxy.Configuration;
 
 namespace fourtynine;
 

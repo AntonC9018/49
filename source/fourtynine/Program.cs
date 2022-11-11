@@ -1,9 +1,5 @@
-using System.Net.Mime;
-using fourtynine;
+using AspNetCore.Proxy;
 using fourtynine.Navbar;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Formatters;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.OpenApi.Models;
 
@@ -40,8 +36,7 @@ builder.Services.AddSwaggerGen(options =>
 
 if (isDevelopment)
 {
-    var proxy = builder.Services.AddReverseProxy();
-    proxy.LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
+    builder.Services.AddProxies();
 }
 
 builder.Services.AddSingleton<INavbarActionsService, NavbarActionsService>();
@@ -66,13 +61,13 @@ if (!isDevelopment)
     app.UseStaticFiles(new StaticFileOptions
     {
         FileProvider = staticFilesProvider,
-        RequestPath = "/",
+        RequestPath = "/StaticFiles",
     });
 
     app.UseDirectoryBrowser(new DirectoryBrowserOptions
     {
         FileProvider = staticFilesProvider,
-        RequestPath = "/filebrowser",
+        RequestPath = "/FileBrowser",
     });
 }
 
@@ -93,9 +88,19 @@ app.UseEndpoints(endpoints =>
         pattern: "{controller=Home}/{action=Index}/{id?}");
 
     endpoints.MapControllers();
-
-    if (isDevelopment)
-        endpoints.MapReverseProxy();
 });
+
+if (isDevelopment)
+{
+    const string vitePort = "5173";
+
+    app.UseProxies(proxies =>
+    {
+        proxies.Map("/vite-ws", proxy => proxy
+            .UseWs($"wss://localhost:{vitePort}/vite-ws"));
+        proxies.Map("/{**all}", proxy => proxy
+            .UseHttp((_, args) => $"https://localhost:{vitePort}/{args["all"]}"));
+    });
+}
 
 app.Run();
