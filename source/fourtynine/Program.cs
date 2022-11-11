@@ -10,9 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 bool isDevelopment = builder.Environment.IsDevelopment();
 
 // Add services to the container.
-builder.Services.AddControllersWithViews(options =>
-{
-});
+builder.Services.AddControllersWithViews();
 
 if (!isDevelopment)
     builder.Services.AddDirectoryBrowser();
@@ -57,14 +55,18 @@ if (!isDevelopment)
 
 app.UseHttpsRedirection();
 app.UseRouting();
+app.UseAuthentication();
 
-app.UseAuthorization();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}");
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    endpoints.MapControllers();
 
-if (isDevelopment)
-    app.MapReverseProxy();
+    if (isDevelopment)
+        endpoints.MapReverseProxy();
+});
 
 app.Run();

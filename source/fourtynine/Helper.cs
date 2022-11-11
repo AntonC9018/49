@@ -69,7 +69,7 @@ public class ApiRoute : RouteAttribute
 }
 
 // Enables API conventions, like [ApiController],
-// but also applies the default content types.
+// while also applying the default content types.
 public class ApiControllerConventionAttribute : Attribute,
     IControllerModelConvention,
     IApiBehaviorMetadata

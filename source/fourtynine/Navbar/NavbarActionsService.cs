@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using fourtynine.Controllers;
-using Microsoft.AspNetCore.Mvc;
 
 namespace fourtynine.Navbar;
 
