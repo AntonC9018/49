@@ -112,35 +112,15 @@ class Build : NukeBuild
     Target GenerateSSLKeysDevelopment => _ => _
         .Executes(() =>
         {
-            AbsolutePath aspnetcoreHttps;
-            string appdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            if (string.IsNullOrEmpty(appdata))
-            {
-                aspnetcoreHttps = (AbsolutePath) Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) 
-                    / ".aspnetcore" / "https";
-            }
-            else
-            {
-                aspnetcoreHttps = (AbsolutePath) appdata / "ASP.NET" / "https";
-            }
+            var paths = CertificatePaths.Create(Solution.Directory);
             
-            var copies = CertificatePaths.Create(Solution.Directory);
-            var sources = CertificatePaths.Create(aspnetcoreHttps);
-
-            if (sources.Exist)
-            {
-                if (!copies.Exist)
-                {
-                    CopyFile(sources.Certificate, copies.Certificate);
-                    CopyFile(sources.Key, copies.Key);
-                }
-            }
-            else
+            if (!paths.Exist)
             {
                 DotNetDevCertsHttpsCreate(new()
                 {
-                    ExportPath = copies.Certificate,
+                    ExportPath = paths.Certificate,
                     NoPassword = true,
+                    WorkingDirectory = Solution.fourtynine.Directory,
                 });
             }
 

@@ -3,7 +3,7 @@ using System.Diagnostics;
 using AspNetCore.Proxy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace fourtynine;
+namespace fourtynine.Development;
 
 public class ViteProxyController : Controller
 {

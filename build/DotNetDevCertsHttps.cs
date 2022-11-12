@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 
@@ -22,7 +23,9 @@ public class DotNetDevCertsHttpsSettings : ToolSettings
     
     public string ExportPath { get; set; }
     public bool? NoPassword { get; set; }
-    
+    public string WorkingDirectory { get; set; }
+    public override string ProcessWorkingDirectory => WorkingDirectory;
+
     protected override Arguments ConfigureProcessArguments(Arguments arguments)
     {
         arguments

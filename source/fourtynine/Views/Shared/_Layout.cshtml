@@ -189,17 +189,13 @@
   @await RenderSectionAsync("Scripts", required: false)
 
   <environment include="Development">
-    @{
-      var viteClient = @"@vite/client";
-    }
-    <script type="module" src="~/@viteClient"></script>
-    <script type="module" src="~/src/main.ts"></script>
+    <script type="module" src="/@@vite/client"></script>
+    <script type="module" src="/src/main.ts"></script>
   </environment>
 
   <environment exclude="Development">
-    <script type="module" asp-src-include="**/main.*.js"></script>
-    <script type="module" asp-src-include="**/vendor.*.js"></script>
-    <link rel="stylesheet" asp-href-include="**/main.*.css">
+    <ImportFile path="src/main.ts"></ImportFile>
+    <ImportFile path="src/main.css"></ImportFile>
   </environment>
 </body>
 </html>

@@ -1,15 +1,20 @@
 using System.Diagnostics;
 using AspNetCore.Proxy;
+using fourtynine;
+using fourtynine.Development;
 using fourtynine.Navbar;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.FeatureManagement;
 using Microsoft.OpenApi.Models;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+{
+    Args = args,
+    WebRootPath = "StaticFiles",
+    ContentRootPath = "",
+});
 bool isDevelopment = builder.Environment.IsDevelopment();
-
-builder.Services.AddFeatureManagement();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews(options =>
@@ -48,6 +53,18 @@ if (isDevelopment)
 
 builder.Services.AddSingleton<INavbarActionsService, NavbarActionsService>();
 
+if (isDevelopment)
+{
+    builder.Services.AddSingleton<IViteManifestService, ViteManifestIdentityMappingService>();
+}
+else
+{
+    // Could also instantiate this dynamically based on the environment.
+    var manifestPath = Path.Join(ProjectConfiguration.StaticFilesFolderRelativePath, "manifest.json");
+    var manifestService = new ViteManifestService(manifestPath);
+    builder.Services.AddSingleton<IViteManifestService>(manifestService);
+}
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -68,7 +85,7 @@ if (!isDevelopment)
     app.UseStaticFiles(new StaticFileOptions
     {
         FileProvider = staticFilesProvider,
-        RequestPath = "/StaticFiles",
+        RequestPath = "",
     });
 
     app.UseDirectoryBrowser(new DirectoryBrowserOptions
