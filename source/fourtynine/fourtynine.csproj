@@ -5,10 +5,17 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
+  <PropertyGroup>
+    <PRODUCTION Condition=" '$(PRODUCTION)' == '' ">false</PRODUCTION>
+    <DefineConstants Condition=" '$(PRODUCTION)' == 'true' ">PRODUCTION</DefineConstants>
+    <DefineConstants Condition=" '$(PRODUCTION)' != 'true' ">DEVELOPMENT</DefineConstants>
+  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="AspNetCore.Proxy" Version="4.4.0" />
+    <PackageReference Include="Microsoft.FeatureManagement.AspNetCore" Version="3.0.0-preview" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
+  
 
 </Project>

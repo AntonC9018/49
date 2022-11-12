@@ -91,7 +91,8 @@ class Build : NukeBuild
                 .SetConfiguration(Configuration)
                 .SetOutput(outputAppDirectory)
                 .SetProcessWorkingDirectory(Solution.Directory)
-                .EnableNoRestore());
+                .EnableNoRestore()
+                .SetProperty("PRODUCTION", "true"));
 
             Npm("run build", workingDirectory: ViteDirectory);
             

@@ -1,13 +1,20 @@
+using System.Diagnostics;
 using AspNetCore.Proxy;
 using fourtynine.Navbar;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.FeatureManagement;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 bool isDevelopment = builder.Environment.IsDevelopment();
 
+builder.Services.AddFeatureManagement();
+
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+});
 
 if (!isDevelopment)
     builder.Services.AddDirectoryBrowser();
@@ -89,38 +96,6 @@ app.UseEndpoints(endpoints =>
         pattern: "{controller=Home}/{action=Index}/{id?}");
 
     endpoints.MapControllers();
-
-    if (isDevelopment)
-    {
-        const string vitePort = "5173";
-
-        endpoints.Map("/vite-ws", http =>
-        {
-            const string endpoint = $"wss://localhost:{vitePort}/vite-ws";
-            return http.WsProxyAsync(endpoint);
-        });
-
-        // NOTE:
-        // MapFallback may not be used, that would accept requests destined for the api controllers.
-        // Seems to be a bug in the framework.
-        endpoints.Map("/{**all}", async (HttpContext http, string all) =>
-        {
-            await http.HttpProxyAsync($"https://localhost:{vitePort}/{all}");
-        });
-    }
 });
-
-if (false && isDevelopment)
-{
-    const string vitePort = "5173";
-
-    app.UseProxies(proxies =>
-    {
-        proxies.Map("/vite-ws", proxy => proxy
-            .UseWs($"wss://localhost:{vitePort}/vite-ws"));
-        proxies.Map("/{**all}", proxy => proxy
-            .UseHttp((_, args) => $"https://localhost:{vitePort}/{args["all"]}"));
-    });
-}
 
 app.Run();
