@@ -74,6 +74,7 @@ if (!isDevelopment)
 app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthentication();
+app.UseWebSockets();
 
 if (isDevelopment)
 {
@@ -88,9 +89,28 @@ app.UseEndpoints(endpoints =>
         pattern: "{controller=Home}/{action=Index}/{id?}");
 
     endpoints.MapControllers();
+
+    if (isDevelopment)
+    {
+        const string vitePort = "5173";
+
+        endpoints.Map("/vite-ws", http =>
+        {
+            const string endpoint = $"wss://localhost:{vitePort}/vite-ws";
+            return http.WsProxyAsync(endpoint);
+        });
+
+        // NOTE:
+        // MapFallback may not be used, that would accept requests destined for the api controllers.
+        // Seems to be a bug in the framework.
+        endpoints.Map("/{**all}", async (HttpContext http, string all) =>
+        {
+            await http.HttpProxyAsync($"https://localhost:{vitePort}/{all}");
+        });
+    }
 });
 
-if (isDevelopment)
+if (false && isDevelopment)
 {
     const string vitePort = "5173";
 
