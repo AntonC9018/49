@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
@@ -53,6 +54,7 @@ partial class Build : NukeBuild
             DotNetRestore(_ => _
                 .SetProjectFile(project49));
             Npm("install", workingDirectory: ViteDirectory);
+            DotNet("tool restore");
         });
 
     Target Compile => _ => _
@@ -82,7 +84,7 @@ partial class Build : NukeBuild
 
             Npm("run build", workingDirectory: ViteDirectory);
             
-            CopyDirectoryRecursively(ViteOutputDirectory, outputAppDirectory / "StaticFiles");
+            CopyDirectoryRecursively(ViteOutputDirectory, outputAppDirectory / "wwwroot");
         });
 
     record struct CertificatePaths(AbsolutePath Certificate, AbsolutePath Key)
@@ -111,5 +113,24 @@ partial class Build : NukeBuild
             }
 
             DotNet("dev-certs https --trust");
+        });
+
+    Target StartDev => _ => _
+        .Executes(() =>
+        {
+            Process.Start(new ProcessStartInfo()
+            {
+                FileName = "dotnet",
+                Arguments = "watch",
+                WorkingDirectory = Solution.fourtynine.Directory,
+                UseShellExecute = true,
+            });
+            Process.Start(new ProcessStartInfo()
+            {
+                FileName = "npm",
+                Arguments = "run dev",
+                WorkingDirectory = ViteDirectory,
+                UseShellExecute = true,
+            });
         });
 }

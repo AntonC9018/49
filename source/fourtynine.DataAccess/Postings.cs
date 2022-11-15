@@ -26,7 +26,7 @@ public sealed class Posting
     
     public DateTime DatePosted { get; set; }
 
-    public ICollection<string> PictureUrls { get; set; }
+    public ICollection<Picture> Pictures { get; set; }
     
     [Required]
     public int AuthorId { get; set; }
@@ -36,7 +36,7 @@ public sealed class Posting
     // data is stored in a single entity, rather than split across multiple tables.
     // TBH vs TBT, TBH basically always wins.
     // https://www.youtube.com/watch?v=HaL6DKW1mrg
-    // Now, the link does apply to inheritance, but it's the same idea here.
+    // Now, even though the link applies to inheritance, it's the same idea here.
     // We could also store a tag to be able to find out the category easier, and be able to
     // make indices easier, but for now it's fine to just check for nulls.
     // These types being owned makes the storage TBH essentially, all denormalized, with nulls.
@@ -47,16 +47,29 @@ public sealed class Posting
     
     // Examples:
     //
-    // Monetary + Location + RealEstate = 
+    // Pricing + Location + RealEstate = 
     // Selling/Buying/Etc. some real estate at a given location, Vehicle must be null.
     //
-    // Monetary + Vehicle =
+    // Pricing + Vehicle =
     // Selling/Buying/Etc. some vehicle, without an explicit address.
     // 
 }
 
+public class Picture
+{
+    [Required]
+    public long Id { get; set; }
+    
+    [Required]
+    public string Url { get; set; }
+    
+    [Required]
+    public long PostingId { get; set; }
+    public Posting Posting { get; set; }
+}
+
 [Flags]
-public enum MonetaryStatus
+public enum BargainKinds
 {
     Offer = 1 << 0,
     Request = 1 << 1,
@@ -79,8 +92,8 @@ public readonly record struct PriceRange(decimal Min, decimal Max);
 [Owned]
 public sealed class PricingPostingDetails
 {
-    [Column(TypeName = "byte")]
-    public MonetaryStatus Status { get; set; }
+    [Column(TypeName = "tinyint")]
+    public BargainKinds BargainKinds { get; set; }
     
     [Column(TypeName = "money")]
     public decimal? Price { get; set; }
@@ -98,8 +111,7 @@ public sealed class PricingPostingDetails
     [MemberNotNullWhen(returnValue: true, nameof(Price), nameof(PriceMax))]
     public bool HasPriceRange => Price is not null && PriceMax is not null;
     
-    // We have to do bullshit like this, because mapping a value type to multiple columns
-    // is not supported in either EF Core 6 or 7, it's been postponed until version 8.
+    [NotMapped]
     public PriceRange PriceRange
     {
         get
@@ -156,13 +168,14 @@ public sealed class RealEstatePostingDetails
     [Column(TypeName = "varchar(16)")]
     public RealEstateSpacePurpose SpacePurpose { get; set; }
     
-    [Precision(8, 1)]
+    // [Precision(8, 1)]
+    [Column(TypeName = "decimal(8, 1)")]
     public float Area { get; set; }
 
     public int Rooms { get; set; }
 }
 
-public readonly record struct Coordinates(float Latitude, float Longitude); 
+public readonly record struct Coordinates(double Latitude, double Longitude); 
 
 [Owned]
 public sealed class LocationPostingDetails
@@ -178,14 +191,15 @@ public sealed class LocationPostingDetails
     public string? Address { get; set; }
 
     [NotNullIfNotNull(nameof(Longitude))]
-    public float? Latitude { get; set; }
+    public double? Latitude { get; set; }
 
     [NotNullIfNotNull(nameof(Latitude))]
-    public float? Longitude { get; set; }
+    public double? Longitude { get; set; }
 
     [MemberNotNullWhen(returnValue: true, nameof(Latitude))]
     public bool HasCoordinates => Latitude.HasValue;
-
+    
+    [NotMapped]
     public Coordinates Coordinates
     {
         get
@@ -215,10 +229,24 @@ public sealed class PostingsDbContext : DbContext
     public DbSet<Posting> Postings { get; set; }
     public DbSet<Author> Authors { get; set; }
     
+    public PostingsDbContext(DbContextOptions<PostingsDbContext> options)
+        : base(options)
+    {
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
+    }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Posting>()
             .OwnsOne(p => p.Pricing);
+
+        modelBuilder.Entity<Posting>()
+            .HasMany(p => p.Pictures)
+            .WithOne(p => p.Posting);
     }
 }
 

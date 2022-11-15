@@ -47,10 +47,6 @@
           "type": "string",
           "description": "MigrationName"
         },
-        "MigrationOperation": {
-          "type": "string",
-          "description": "MigrationOperation"
-        },
         "NoLogo": {
           "type": "boolean",
           "description": "Disables displaying the NUKE logo"
@@ -80,12 +76,14 @@
           "items": {
             "type": "string",
             "enum": [
+              "AddMigration",
               "Clean",
               "Compile",
               "GenerateSSLKeysDevelopment",
-              "Migrations",
               "Publish",
-              "Restore"
+              "Restore",
+              "StartDev",
+              "UpdateDatabase"
             ]
           }
         },
@@ -99,12 +97,14 @@
           "items": {
             "type": "string",
             "enum": [
+              "AddMigration",
               "Clean",
               "Compile",
               "GenerateSSLKeysDevelopment",
-              "Migrations",
               "Publish",
-              "Restore"
+              "Restore",
+              "StartDev",
+              "UpdateDatabase"
             ]
           }
         },

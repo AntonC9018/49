@@ -5,17 +5,13 @@ using fourtynine.DataAccess;
 using fourtynine.Development;
 using fourtynine.Navbar;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.FeatureManagement;
 using Microsoft.OpenApi.Models;
 
-var builder = WebApplication.CreateBuilder(new WebApplicationOptions
-{
-    Args = args,
-    WebRootPath = "StaticFiles",
-    ContentRootPath = "",
-});
+var builder = WebApplication.CreateBuilder(args);
 bool isDevelopment = builder.Environment.IsDevelopment();
 
 // Add services to the container.
@@ -23,8 +19,19 @@ builder.Services.AddControllersWithViews(options =>
 {
 });
 
-builder.Services.AddDbContext<PostingsDbContext>(
-    options => options.UseSqlServer("name=ConnectionStrings:DefaultConnection"));
+builder.Services.AddDbContext<PostingsDbContext>(options =>
+{
+    var connectionString = builder.Configuration.GetConnectionString("Postings");
+    
+    // Could use the secrets manager to configure passwords and stuff.
+    // I guess, the user name would be configured in here too.
+    // https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-7.0&tabs=windows#string-replacement-with-secrets
+    // var b = new SqlConnectionStringBuilder(connectionString);
+    // connectionString = b.ConnectionString;
+    
+    
+    options.UseSqlServer(connectionString);
+});
 
 if (!isDevelopment)
     builder.Services.AddDirectoryBrowser();
@@ -73,11 +80,7 @@ else
 var app = builder.Build();
 
 if (isDevelopment)
-{
-    using var serviceScope = app.Services.GetRequiredService<IServiceScopeFactory>().CreateScope();
-    var context = serviceScope.ServiceProvider.GetRequiredService<PostingsDbContext>();
-    context.Database.EnsureCreated();
-}
+    app.EnsureDatabaseCreated<PostingsDbContext>();
 
 // Configure the HTTP request pipeline.
 if (!isDevelopment)
@@ -90,19 +93,11 @@ if (!isDevelopment)
 if (!isDevelopment)
 {
     // In development static files are served by vite.
-    var staticFilesPath = "StaticFiles";
-    var staticFilesProvider = new PhysicalFileProvider(
-        Path.Combine(builder.Environment.ContentRootPath, staticFilesPath));
-    
-    app.UseStaticFiles(new StaticFileOptions
-    {
-        FileProvider = staticFilesProvider,
-        RequestPath = "",
-    });
+    app.UseStaticFiles();
 
     app.UseDirectoryBrowser(new DirectoryBrowserOptions
     {
-        FileProvider = staticFilesProvider,
+        FileProvider = builder.Environment.WebRootFileProvider,
         RequestPath = "/FileBrowser",
     });
 }

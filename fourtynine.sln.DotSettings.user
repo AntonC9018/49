@@ -2,5 +2,6 @@
 	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;&#xD;
   &lt;Assembly Path="C:\Users\Anton\.nuget\packages\microsoft.aspnetcore.spaservices.extensions\6.0.11\lib\net6.0\Microsoft.AspNetCore.SpaServices.Extensions.dll" /&gt;&#xD;
 &lt;/AssemblyExplorer&gt;</s:String>
+	<s:Boolean x:Key="/Default/UnloadedProject/UnloadedProjects/=a41f84df_002De681_002D4791_002D932d_002D7d8827234413_0023fourtynine_002ESqlServerMigrations/@EntryIndexedValue">True</s:Boolean>
 	
 	</wpf:ResourceDictionary>
