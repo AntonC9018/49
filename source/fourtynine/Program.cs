@@ -1,9 +1,11 @@
 using System.Diagnostics;
 using AspNetCore.Proxy;
 using fourtynine;
+using fourtynine.DataAccess;
 using fourtynine.Development;
 using fourtynine.Navbar;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.FeatureManagement;
 using Microsoft.OpenApi.Models;
@@ -20,6 +22,9 @@ bool isDevelopment = builder.Environment.IsDevelopment();
 builder.Services.AddControllersWithViews(options =>
 {
 });
+
+builder.Services.AddDbContext<PostingsDbContext>(
+    options => options.UseSqlServer("name=ConnectionStrings:DefaultConnection"));
 
 if (!isDevelopment)
     builder.Services.AddDirectoryBrowser();
@@ -66,6 +71,13 @@ else
 }
 
 var app = builder.Build();
+
+if (isDevelopment)
+{
+    using var serviceScope = app.Services.GetRequiredService<IServiceScopeFactory>().CreateScope();
+    var context = serviceScope.ServiceProvider.GetRequiredService<PostingsDbContext>();
+    context.Database.EnsureCreated();
+}
 
 // Configure the HTTP request pipeline.
 if (!isDevelopment)

@@ -1,27 +1,14 @@
-using System;
-using System.IO;
-using System.Linq;
-using CliWrap;
-using Microsoft.Build.Tasks;
 using Nuke.Common;
-using Nuke.Common.CI;
-using Nuke.Common.Execution;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
-using Nuke.Common.Tools.MSBuild;
-using Nuke.Common.Tools.Npm;
-using Nuke.Common.Utilities.Collections;
-using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.IO.FileSystemTasks;
-using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
-using static Nuke.Common.Tools.MSBuild.MSBuildTasks;
 using static Nuke.Common.Tools.Npm.NpmTasks;
 using static CustomToolWrappers.DotNetDevCertsHttpsSettings;
 
-class Build : NukeBuild
+partial class Build : NukeBuild
 {
     /// Support plugins are available for:
     ///   - JetBrains ReSharper        https://nuke.build/resharper
@@ -40,8 +27,7 @@ class Build : NukeBuild
     AbsolutePath OutputDirectory => Solution.Directory / "output";
     AbsolutePath ViteDirectory => Solution.Directory / "source" / "fourtynine.ClientApp";
     AbsolutePath ViteOutputDirectory => ViteDirectory / "dist";
-
-
+    
     Target Clean => _ => _
         .Before(Restore)
         .Executes(() =>
