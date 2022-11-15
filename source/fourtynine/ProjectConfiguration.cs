@@ -2,6 +2,12 @@
 
 public static class ProjectConfiguration
 {
+    /// <summary>
+    /// I wanted to use "StaticFiles" for this, because it honestly makes more sense,
+    /// but ASP.NET Core makes it quite annoying to change these defaults.
+    /// For example, it would look for the wwwroot folder even if you set the
+    /// WebRootPath to some other value when creating the builder. 
+    /// </summary>
     public const string StaticFilesFolderRelativePath = "wwwroot";
     
     /// <summary>
