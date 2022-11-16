@@ -3,11 +3,11 @@ using System.Data.Common;
 using System.Diagnostics;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 
 namespace fourtynine;
 
@@ -82,6 +82,7 @@ public class ApiControllerConventionAttribute : Attribute,
     }
 }
 
+
 // Not gonna work, because there is stuff in /public which doesn't end up in the manifest.
 // public class ViteManifestReverseProxyFilter : IProxyConfigFilter
 // {
@@ -96,14 +97,3 @@ public class ApiControllerConventionAttribute : Attribute,
 //     {
 //     }
 // } 
-
-public static class DatabaseHelper
-{
-    public static void EnsureDatabaseCreated<TDbContext>(this WebApplication app)
-        where TDbContext : DbContext
-    {
-        using var serviceScope = app.Services.GetRequiredService<IServiceScopeFactory>().CreateScope();
-        var context = serviceScope.ServiceProvider.GetRequiredService<TDbContext>();
-        context.Database.EnsureCreated();
-    }
-}

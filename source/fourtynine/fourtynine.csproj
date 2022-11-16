@@ -16,11 +16,14 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.11" />
     <PackageReference Include="Microsoft.FeatureManagement.AspNetCore" Version="3.0.0-preview" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+    <PackageReference Include="LinqKit" Version="1.2.3" />
 
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.11">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+<!--    Maybe find out how to make this work with EF Core some time later? -->
+<!--    <PackageReference Include="AutoMapper" Version="12.0.0" />-->
   </ItemGroup>
 
   <ItemGroup>

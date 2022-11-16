@@ -222,7 +222,7 @@ public sealed class LocationPostingDetails
 // }
 
 
-#pragma warning enable 8618 // Disable nullability warnings for EF Core
+#pragma warning restore 8618 // Disable nullability warnings for EF Core
 
 public sealed class PostingsDbContext : DbContext
 {
@@ -249,4 +249,3 @@ public sealed class PostingsDbContext : DbContext
             .WithOne(p => p.Posting);
     }
 }
-
