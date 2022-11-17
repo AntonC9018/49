@@ -1,67 +1,105 @@
 ﻿using System.Diagnostics;
-using fourtynine.Controllers;
 
 namespace fourtynine.Navbar;
 
-public record NavbarAction(
-    string Controller,
-    string Action,
-    string Url,
-    string DisplayName)
+public record struct RouteInfo(string ControllerOrPage, string? Action);
+
+public interface INavbarAction
 {
-    public static NavbarAction Create(
+    string DisplayName { get; }
+    string Path { get; }
+    bool IsMatch(in RouteInfo routeInfo);
+}
+
+public record NavbarControllerAction(
+    string Controller,
+    string? Action,
+    string Path,
+    string DisplayName) : INavbarAction
+{
+    public static NavbarControllerAction Create(
         LinkGenerator linkGenerator,
         string controllerName,
         string actionName,
         string displayName)
     {
-        var url = linkGenerator.GetPathByAction(action: actionName, controller: controllerName);
-        Debug.Assert(url is not null, $"Bad action parameters: {controllerName} / {actionName}");
+        var path = linkGenerator.GetPathByAction(action: actionName, controller: controllerName);
+        Debug.Assert(path is not null, $"Bad action parameters: {controllerName} / {actionName}");
 
-        return new NavbarAction(
+        return new NavbarControllerAction(
             Controller: controllerName,
             Action: actionName,
-            Url: url,
+            Path: path,
             DisplayName: displayName);
     }
 
-    public bool IsSameAction(string controllerName, string actionName)
+    public bool IsMatch(in RouteInfo routeInfo)
     {
         // I'm actually not quite sure how it would play out with redirecting actions?
         // We must assert the links never point to redirecting actions.
-        return controllerName == Controller && actionName == Action;
+        return routeInfo.ControllerOrPage == Controller
+            && routeInfo.Action == Action;
+    }
+}
+
+public record NavbarPageAction(
+    string Page,
+    string Path,
+    string DisplayName) : INavbarAction
+{
+    public static NavbarPageAction Create(
+        LinkGenerator linkGenerator,
+        string page,
+        string displayName)
+    {
+        var path = linkGenerator.GetPathByPage(page);
+        Debug.Assert(path is not null, $"Bad page parameters: {page}");
+
+        return new NavbarPageAction(
+            Page: page,
+            Path: path,
+            DisplayName: displayName);
+    }
+
+    public bool IsMatch(in RouteInfo routeInfo)
+    {
+        return routeInfo.ControllerOrPage == Page && routeInfo.Action is null;
     }
 }
 
 public interface INavbarActionsService
 {
-    IEnumerable<NavbarAction> NavbarActions { get; }
-    NavbarAction HomeAction { get; }
+    IEnumerable<INavbarAction> NavbarActions { get; }
+    INavbarAction HomeAction { get; }
 }
 
 public class NavbarActionsService : INavbarActionsService
 {
-    public IEnumerable<NavbarAction> NavbarActions => _navbarActions;
-    public NavbarAction HomeAction { get; }
-    private readonly NavbarAction[] _navbarActions; 
+    public IEnumerable<INavbarAction> NavbarActions => _navbarActions;
+    public INavbarAction HomeAction { get; }
+    private readonly INavbarAction[] _navbarActions; 
     
     public NavbarActionsService(LinkGenerator linkGenerator)
     {
-        HomeAction = NavbarAction.Create(
+        HomeAction = NavbarPageAction.Create(
             linkGenerator,
-            nameof(HomeController).ControllerName(),
-            nameof(HomeController.Index),
+            page: "/Index",
             "Home");
-
-        var privacy = NavbarAction.Create(
+        
+        var create = NavbarPageAction.Create(
             linkGenerator,
-            nameof(HomeController).ControllerName(),
-            nameof(HomeController.Privacy),
+            page: "/Posting/Create",
+            "New Posting");
+        
+        var privacy = NavbarPageAction.Create(
+            linkGenerator,
+            page: "/Privacy",
             "Privacy");
 
         _navbarActions = new[]
         {
             HomeAction,
+            create,
             privacy,
         };
     }

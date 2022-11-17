@@ -2,6 +2,7 @@
 using System.Data.Common;
 using System.Diagnostics;
 using System.Net.Mime;
+using fourtynine.Navbar;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
@@ -56,6 +57,20 @@ public static class RoutingHelper
         string? name = (string?) view.RouteData.Values["action"];
         Debug.Assert(name is not null, "Action in route must not be null");
         return name;
+    }
+
+    public static RouteInfo GetCurrentRouteInfo(this ViewContext view)
+    {
+        string? controller = (string?) view.RouteData.Values["controller"];
+        if (controller is null)
+        {
+            string? page = (string?) view.RouteData.Values["page"];
+            Debug.Assert(page is not null, "Neither a controller nor a page?");
+            return new RouteInfo(page, null);
+        }
+
+        return new RouteInfo(controller, GetCurrentActionName(view));
+
     }
 }
 

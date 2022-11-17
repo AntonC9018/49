@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="AspNetCore.Proxy" Version="4.4.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="6.0.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.11" />
     <PackageReference Include="Microsoft.FeatureManagement.AspNetCore" Version="3.0.0-preview" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
@@ -28,6 +29,15 @@
 
   <ItemGroup>
     <ProjectReference Include="..\fourtynine.DataAccess\fourtynine.DataAccess.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Postings\CreatePostingPageModel.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="Pages\Index.cshtml" />
+    <AdditionalFiles Include="Pages\Privacy.cshtml" />
   </ItemGroup>
   
 

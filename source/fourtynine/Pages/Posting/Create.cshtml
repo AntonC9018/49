@@ -1,4 +1,5 @@
-﻿@Model CreatePostingPageModel
+﻿@page
+@model fourtynine.Postings.CreatePostingPageModel
 @{
     ViewData["Title"] = "Create Posting";
 }
@@ -12,12 +13,13 @@
     shadow-lg
     bg-white
     max-w-sm
+    w-full
   "
 >
   <form>
     <div class="form-group mb-6">
       <label
-        asp-for="Model.Title" 
+        asp-for="Data.Title" 
         class="form-label"
       >Email address</label>
 

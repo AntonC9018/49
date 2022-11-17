@@ -60,7 +60,7 @@
             text-2xl
             lg:text-4xl
           "
-          href="@(NavbarActionsService.HomeAction.Url)"
+          href="@(NavbarActionsService.HomeAction.Path)"
         >
           49
         </a>
@@ -125,8 +125,7 @@
         >
           @{
             var navbarActions = NavbarActionsService.NavbarActions;
-            var currentController = ViewContext.GetCurrentControllerName();
-            var currentAction = ViewContext.GetCurrentActionName();
+            var currentRouteInfo = ViewContext.GetCurrentRouteInfo();
             var activeClasses = @"font-bold";
             var inactiveClasses = @"
               hover:text-gray-800
@@ -135,7 +134,7 @@
             
             foreach (var navbarAction in navbarActions)
             {
-              bool isActive = navbarAction.IsSameAction(currentController, currentAction);
+              bool isActive = navbarAction.IsMatch(currentRouteInfo);
               <li class="mr-3">
                 <a
                   class="
@@ -145,7 +144,7 @@
                     no-underline
                     py-2 px-4
                   "
-                  href="@(navbarAction.Url)"
+                  href="@(navbarAction.Path)"
                 >
                   @(navbarAction.DisplayName)
                 </a>
@@ -181,8 +180,19 @@
   </nav>
 
 	<!--Container-->
-	<div class="container shadow-lg mx-auto bg-white mt-24 md:mt-18 min-h-screen">
-		Here
+  <div 
+    class="
+      container
+      shadow-lg
+      mx-auto
+      bg-white
+      flex justify-center
+      w-full
+      mt-24
+      md:mt-18
+      min-h-screen
+    "
+  >
 		@RenderBody()
 	</div>
 

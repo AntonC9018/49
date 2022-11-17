@@ -15,9 +15,13 @@ var builder = WebApplication.CreateBuilder(args);
 bool isDevelopment = builder.Environment.IsDevelopment();
 
 // Add services to the container.
-builder.Services.AddControllersWithViews(options =>
+builder.Services.AddControllers(options =>
 {
 });
+builder.Services.AddRazorPages()
+    .WithRazorPagesRoot("/Pages")
+    // Razor pages don't recompile = css in the html doesn't update.
+    .AddRazorRuntimeCompilation();
 
 builder.Services.AddDbContext<PostingsDbContext>(options =>
 {
@@ -115,9 +119,11 @@ if (isDevelopment)
 
 app.UseEndpoints(endpoints =>
 {
-    endpoints.MapControllerRoute(
-        name: "default",
-        pattern: "{controller=Home}/{action=Index}/{id?}");
+    endpoints.MapRazorPages();
+    
+    // endpoints.MapControllerRoute(
+    //     name: "default",
+    //     pattern: "{controller=Home}/{action=Index}/{id?}");
 
     endpoints.MapControllers();
 });
