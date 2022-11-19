@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# For the sake of simplyfing the project restore a little,
+# I'm adding the generated client to source control.
+# Otherwise, we'd have to wait until the backend runs to generate it in the nuke task.
+#src/api-client.ts

@@ -38,3 +38,5 @@ I'm getting the general impression that proxy API's in ASP.NET Core are quirky a
 - [Nuke](https://nuke.build/) for build automation and script management (I'm not quite sure how good it is for scripts, might be better off doing a custom tool with some references to it instead);
 
 - [Entity Framework Core](https://docs.microsoft.com/en-us/ef/core/) with [SqlServer](https://docs.microsoft.com/en-us/ef/core/providers/sql-server/?tabs=dotnet-core-cli) for database access;
+
+- [NSwag](https://github.com/RicoSuter/NSwag) for generating the TypeScript API client;

@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <PackageDownload Include="Microsoft.Web.LibraryManager.Cli" Version="[2.1.175]" />
+    <PackageReference Include="NSwag.CodeGeneration.TypeScript" Version="13.18.0" />
   </ItemGroup>
 
 </Project>

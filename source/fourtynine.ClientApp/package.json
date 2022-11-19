@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "swagger-gen": "npm swag-ts"
   },
   "devDependencies": {
     "@types/node": "^18.11.9",

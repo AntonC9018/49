@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text.Json;
 using AspNetCore.Proxy;
 using fourtynine;
 using fourtynine.DataAccess;
@@ -11,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.FeatureManagement;
 using Microsoft.OpenApi.Models;
+using Unchase.Swashbuckle.AspNetCore.Extensions.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 bool isDevelopment = builder.Environment.IsDevelopment();
@@ -18,7 +20,13 @@ bool isDevelopment = builder.Environment.IsDevelopment();
 // Add services to the container.
 builder.Services.AddControllers(options =>
 {
+}).AddJsonOptions(options =>
+{
+    // Keep the source casing.
+    options.JsonSerializerOptions.PropertyNamingPolicy = null;
+    options.JsonSerializerOptions.DictionaryKeyPolicy = null;
 });
+
 builder.Services.AddRazorPages()
     .WithRazorPagesRoot("/Pages")
     // Razor pages don't recompile = css in the html doesn't update.
@@ -59,8 +67,9 @@ builder.Services.AddSwaggerGen(options =>
         {
             Name = "Example License",
             Url = new Uri("https://example.com/license")
-        }
+        },
     });
+    options.AddEnumsWithValuesFixFilters();
 });
 
 if (isDevelopment)

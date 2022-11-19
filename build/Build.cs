@@ -1,13 +1,16 @@
 using System.Diagnostics;
+using NuGet.Configuration;
 using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
+using Nuke.Common.Tools.NSwag;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using static Nuke.Common.Tools.Npm.NpmTasks;
 using static CustomToolWrappers.DotNetDevCertsHttpsSettings;
+using static Nuke.Common.Tools.NSwag.NSwagTasks;
 
 partial class Build : NukeBuild
 {
@@ -114,6 +117,7 @@ partial class Build : NukeBuild
 
             DotNet("dev-certs https --trust");
         });
+    
 
     Target StartDev => _ => _
         .Executes(() =>
