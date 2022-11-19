@@ -168,7 +168,7 @@ public class ViteImportFileTagHelper : TagHelper
 
         switch (extension)
         {
-            case "js":
+            case "js" or "ts":
             {
                 output.TagName = "script";
                 output.Attributes.SetAttribute("src", targetUrl);

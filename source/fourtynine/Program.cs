@@ -4,6 +4,7 @@ using fourtynine;
 using fourtynine.DataAccess;
 using fourtynine.Development;
 using fourtynine.Navbar;
+using fourtynine.Postings;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -80,6 +81,8 @@ else
     var manifestService = new ViteManifestService(manifestPath);
     builder.Services.AddSingleton<IViteManifestService>(manifestService);
 }
+
+builder.Services.AddScoped<PostingApiService>();
 
 var app = builder.Build();
 

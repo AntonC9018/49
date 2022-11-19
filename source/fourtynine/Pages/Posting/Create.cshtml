@@ -16,57 +16,29 @@
     w-full
   "
 >
-  <form>
+  <form 
+    autocomplete="on"
+    name="postingForm"
+    method="post"
+  >
     <div class="form-group mb-6">
       <label
-        asp-for="Data.Title" 
+        for="Posting.Title" 
         class="form-label"
-      >Email address</label>
+      >Title</label>
 
       <input
-        type="email" 
+        name="Posting.Title"
+        type="text" 
+        id="Posting.Title"
         class="form-input-field"
-        id="exampleInputEmail1"
-        aria-describedby="emailHelp"
-        placeholder="Enter email"
+        placeholder="Enter title"
       >
-      <small
-        id="emailHelp"
-        class="
-          block
-          mt-1
-          text-xs
-          text-gray-600
-        "
-      >
-      We'll never share your email with anyone else.
-      </small>
     </div>
-
-    <div class="form-group mb-6">
-      <label
-        for="exampleInputPassword1"
-        class="
-          form-label
-          inline-block
-          mb-2
-          text-gray-700
-        "
-      >
-      Password
-      </label>
-      
-      <input
-        type="password" 
-        class="form-input-field"
-        id="exampleInputPassword1"
-        placeholder="Password">
-    </div>
-    <div class="form-group form-check mb-6">
+    <div class="mb-6">
       <input
         type="checkbox"
         class="
-          form-check-input
           appearance-none
           h-4 w-4
           border
@@ -89,7 +61,14 @@
           cursor-pointer
         "
         id="exampleCheck1">
-      <label class="form-check-label inline-block text-gray-800" for="exampleCheck1">Check me out</label>
+      <label
+        class="
+          form-check-label
+          inline-block
+          text-gray-800
+        "
+        for="exampleCheck1"
+      >Check me out</label>
     </div>
     <button
       type="submit" 
@@ -112,7 +91,9 @@
         ease-in-out
       "
     >
-    Submit
+      Submit
     </button>
   </form>
 </div>
+
+<ImportFile path="src/postingForm.ts"></ImportFile>
