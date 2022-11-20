@@ -15,9 +15,6 @@
     "noImplicitReturns": true,
     "skipLibCheck": true,
     "plugins": [
-      {
-        "transform": "tst-reflect-transformer"
-      }
     ]
   },
   "include": ["src"]

@@ -1,7 +1,5 @@
 ﻿import { defineConfig } from "vite";
 import { fileURLToPath, URL } from "url";
-import typescript from '@rollup/plugin-typescript';
-import ttypescript from 'ttypescript'
 
 const vitePort = 5173;
 
@@ -37,9 +35,6 @@ export default defineConfig({
         },
     },
     plugins: [
-        typescript({
-            typescript: ttypescript,
-        }),
     ],
 })
 

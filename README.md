@@ -17,6 +17,8 @@ For development:
 
 Assuming the database client is installed on your machine, the database should get created automatically.
 
+If you make changes to the API, the TypeScript client has to be regenerated manually. For that, run `build generateSwaggerTypeScriptClient` while the backend is running.
+
 Tech used:
 
 - [Vite](https://vitejs.dev/) for package management and maybe later some React pages;
@@ -49,3 +51,4 @@ At that point it's clearly worth it to use a library.
 Since we've got NSwag, TypeScript has information on the types through the generated client, so I decided to dig into [TypeScript reflection](https://github.com/Hookyns/tst-reflect) to do said validation.
 I'm now thinking it's better to validate through the swagger spec.
 Either checks should be disabled in production though.
+After some thought and experimentation, I went ahead and did a hack to generate the reflection info that I need for validation using NSwag in the client generation Nuke task. The reflection did not work out, see [my issue](https://github.com/Hookyns/tst-reflect/issues/83).

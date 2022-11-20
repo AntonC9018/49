@@ -873,3 +873,75 @@ function throwException(message: string, status: number, response: string, heade
     else
         throw new ApiException(message, status, response, headers, null);
 }
+export const ApiPropertyTable = {
+    BargainKinds: [
+    ],
+    INavbarAction: [
+        { name: "DisplayName", schemaTypeName: null },
+        { name: "Path", schemaTypeName: null },
+    ],
+    LocationPostingDetails: [
+        { name: "Country", schemaTypeName: null },
+        { name: "City", schemaTypeName: null },
+        { name: "Address", schemaTypeName: null },
+        { name: "Latitude", schemaTypeName: null },
+        { name: "Longitude", schemaTypeName: null },
+    ],
+    PostingAuthorGet: [
+        { name: "Id", schemaTypeName: null },
+        { name: "Name", schemaTypeName: null },
+        { name: "Email", schemaTypeName: null },
+    ],
+    PostingCreate: [
+        { name: "Title", schemaTypeName: null },
+        { name: "Description", schemaTypeName: null },
+        { name: "ThumbnailUrl", schemaTypeName: null },
+        { name: "Details", schemaTypeName: "PostingDetails" },
+    ],
+    PostingDetails: [
+        { name: "Pricing", schemaTypeName: "PricingPostingDetails" },
+        { name: "Vehicle", schemaTypeName: "VehiclePostingDetails" },
+        { name: "RealEstate", schemaTypeName: "RealEstatePostingDetails" },
+        { name: "Location", schemaTypeName: "LocationPostingDetails" },
+    ],
+    PostingGetDetailed: [
+        { name: "General", schemaTypeName: "PostingGetGeneral" },
+        { name: "PictureUrls", schemaTypeName: null },
+        { name: "Author", schemaTypeName: "PostingAuthorGet" },
+        { name: "Details", schemaTypeName: "PostingDetails" },
+    ],
+    PostingGetGeneral: [
+        { name: "Id", schemaTypeName: null },
+        { name: "Title", schemaTypeName: null },
+        { name: "Description", schemaTypeName: null },
+        { name: "ThumbnailUrl", schemaTypeName: null },
+        { name: "DatePosted", schemaTypeName: null },
+    ],
+    PricingPostingDetails: [
+        { name: "BargainKinds", schemaTypeName: null },
+        { name: "Price", schemaTypeName: null },
+        { name: "PriceMax", schemaTypeName: null },
+    ],
+    ProblemDetails: [
+        { name: "type", schemaTypeName: null },
+        { name: "title", schemaTypeName: null },
+        { name: "status", schemaTypeName: null },
+        { name: "detail", schemaTypeName: null },
+        { name: "instance", schemaTypeName: null },
+    ],
+    RealEstateKind: [
+    ],
+    RealEstatePostingDetails: [
+        { name: "Kind", schemaTypeName: null },
+        { name: "SpacePurpose", schemaTypeName: null },
+        { name: "Area", schemaTypeName: null },
+        { name: "Rooms", schemaTypeName: null },
+    ],
+    RealEstateSpacePurpose: [
+    ],
+    VehiclePostingDetails: [
+        { name: "Year", schemaTypeName: null },
+        { name: "Manufacturer", schemaTypeName: null },
+        { name: "Model", schemaTypeName: null },
+    ],
+};

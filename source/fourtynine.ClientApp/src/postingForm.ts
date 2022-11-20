@@ -1,28 +1,16 @@
-﻿import './api-client';
-import {
+﻿import {
+    ApiPropertyTable,
     PostingCreate,
 } from "./api-client";
-import {getType,Type} from "tst-reflect";
 
 export {}
-
-
-class A
-{
-    s?: string | undefined;
-}
-console.warn(getType<number|string>().types);
-console.warn(getType<A>().getProperties().find(p => p.name == "s")!.type.types);
-
-console.warn("sdsdds");
-
 
 initializePostingForm();
 
 function initializePostingForm()
 {
     const form = document.querySelector(`form[name="postingForm"]`) as HTMLFormElement;
-    validateForm(form, getType<PostingCreate>());
+    validateForm(form, "PostingCreate");
 
     form.addEventListener("submit", function (event)
     {
@@ -37,11 +25,13 @@ function initializePostingForm()
     });
 }
 
-function validateForm(form: HTMLFormElement, type: Type)
+type ApiSchemaName = keyof typeof ApiPropertyTable;
+
+function validateForm(form: HTMLFormElement, schemaName: ApiSchemaName)
 {
     console.assert(form != null);
 
-    const dtoKeys = new Set<string>(getDeepPropertyKeys(type));
+    const dtoKeys = new Set<string>(getDeepPropertyKeys(schemaName));
     let foundKeys = new Set<string>();
     for (let i = 0; i < form.elements.length; i++)
     {
@@ -64,21 +54,20 @@ function validateForm(form: HTMLFormElement, type: Type)
         console.error("The following keys were not found in the form: " + Array.from(difference).join(", "));
 }
 
-function getDeepPropertyKeys(type: Type) : string[]
+function getDeepPropertyKeys(schemaName: ApiSchemaName) : string[]
 {
     let output : string[] = [];
-    _getDeepPropertyKeys(type, "", output);
+    _getDeepPropertyKeys(schemaName, "", output);
     return output;
 }
 
-function _getDeepPropertyKeys(type: Type, prefix: string, output : string[])
+function _getDeepPropertyKeys(type: ApiSchemaName, prefix: string, output : string[])
 {
-    for (let prop of type.getProperties())
+    for (let prop of ApiPropertyTable[type])
     {
         let p = prefix + prop.name;
-        console.log(prop.type);
-        if (prop.type.isInterface())
-            _getDeepPropertyKeys(prop.type, p + ".", output);
+        if (prop.schemaTypeName)
+            _getDeepPropertyKeys(<ApiSchemaName> prop.schemaTypeName, p + ".", output);
         else
             output.push(p);
     }
