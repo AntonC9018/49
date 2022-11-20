@@ -40,3 +40,12 @@ I'm getting the general impression that proxy API's in ASP.NET Core are quirky a
 - [Entity Framework Core](https://docs.microsoft.com/en-us/ef/core/) with [SqlServer](https://docs.microsoft.com/en-us/ef/core/providers/sql-server/?tabs=dotnet-core-cli) for database access;
 
 - [NSwag](https://github.com/RicoSuter/NSwag) for generating the TypeScript API client;
+
+- [AutoMapper](https://automapper.org/).
+Tried mapping manually initially, but it's very clear to me that that approach is unmaintainable, resulting in a lot of code duplication, or complications from combining expression trees.
+At that point it's clearly worth it to use a library.
+
+- I needed to validate the used form names, so that they always correspond to the expected DTO.
+Since we've got NSwag, TypeScript has information on the types through the generated client, so I decided to dig into [TypeScript reflection](https://github.com/Hookyns/tst-reflect) to do said validation.
+I'm now thinking it's better to validate through the swagger spec.
+Either checks should be disabled in production though.
