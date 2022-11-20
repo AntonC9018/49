@@ -65,7 +65,7 @@ export class Client {
     /**
      * @return Success
      */
-    postingGET(id: number): Promise<PostingGetDto_General> {
+    postingGET(id: number): Promise<PostingGetGeneral> {
         let url_ = this.baseUrl + "/api/Posting/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -84,14 +84,14 @@ export class Client {
         });
     }
 
-    protected processPostingGET(response: Response): Promise<PostingGetDto_General> {
+    protected processPostingGET(response: Response): Promise<PostingGetGeneral> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = PostingGetDto_General.fromJS(resultData200);
+            result200 = PostingGetGeneral.fromJS(resultData200);
             return result200;
             });
         } else if (status === 404) {
@@ -106,13 +106,13 @@ export class Client {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<PostingGetDto_General>(null as any);
+        return Promise.resolve<PostingGetGeneral>(null as any);
     }
 
     /**
      * @return Success
      */
-    detailed(id: number): Promise<PostingGetDto_Detailed> {
+    detailed(id: number): Promise<PostingGetDetailed> {
         let url_ = this.baseUrl + "/api/Posting/detailed/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -131,14 +131,14 @@ export class Client {
         });
     }
 
-    protected processDetailed(response: Response): Promise<PostingGetDto_Detailed> {
+    protected processDetailed(response: Response): Promise<PostingGetDetailed> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = PostingGetDto_Detailed.fromJS(resultData200);
+            result200 = PostingGetDetailed.fromJS(resultData200);
             return result200;
             });
         } else if (status === 404) {
@@ -153,7 +153,7 @@ export class Client {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<PostingGetDto_Detailed>(null as any);
+        return Promise.resolve<PostingGetDetailed>(null as any);
     }
 
     /**
@@ -161,7 +161,7 @@ export class Client {
      * @param startId (optional) 
      * @return Success
      */
-    postingAll(count: number | undefined, startId: number | undefined): Promise<PostingGetDto_General[]> {
+    postingAll(count: number | undefined, startId: number | undefined): Promise<PostingGetGeneral[]> {
         let url_ = this.baseUrl + "/api/Posting?";
         if (count === null)
             throw new Error("The parameter 'count' cannot be null.");
@@ -185,7 +185,7 @@ export class Client {
         });
     }
 
-    protected processPostingAll(response: Response): Promise<PostingGetDto_General[]> {
+    protected processPostingAll(response: Response): Promise<PostingGetGeneral[]> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
@@ -195,7 +195,7 @@ export class Client {
             if (Array.isArray(resultData200)) {
                 result200 = [] as any;
                 for (let item of resultData200)
-                    result200!.push(PostingGetDto_General.fromJS(item));
+                    result200!.push(PostingGetGeneral.fromJS(item));
             }
             else {
                 result200 = <any>null;
@@ -214,14 +214,14 @@ export class Client {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<PostingGetDto_General[]>(null as any);
+        return Promise.resolve<PostingGetGeneral[]>(null as any);
     }
 
     /**
      * @param body (optional) 
      * @return Created
      */
-    postingPOST(body: PostingCreateDto | undefined): Promise<PostingGetDto_Detailed> {
+    postingPOST(body: PostingCreate | undefined): Promise<PostingGetDetailed> {
         let url_ = this.baseUrl + "/api/Posting";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -241,14 +241,14 @@ export class Client {
         });
     }
 
-    protected processPostingPOST(response: Response): Promise<PostingGetDto_Detailed> {
+    protected processPostingPOST(response: Response): Promise<PostingGetDetailed> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 201) {
             return response.text().then((_responseText) => {
             let result201: any = null;
             let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result201 = PostingGetDto_Detailed.fromJS(resultData201);
+            result201 = PostingGetDetailed.fromJS(resultData201);
             return result201;
             });
         } else if (status === 400) {
@@ -263,7 +263,7 @@ export class Client {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<PostingGetDto_Detailed>(null as any);
+        return Promise.resolve<PostingGetDetailed>(null as any);
     }
 }
 
@@ -279,46 +279,6 @@ export enum BargainKinds {
     Lease = 10,
     SaleOrRent = 13,
     BuyOrLease = 14,
-}
-
-export class Coordinates implements ICoordinates {
-    Latitude?: number;
-    Longitude?: number;
-
-    constructor(data?: ICoordinates) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.Latitude = _data["Latitude"];
-            this.Longitude = _data["Longitude"];
-        }
-    }
-
-    static fromJS(data: any): Coordinates {
-        data = typeof data === 'object' ? data : {};
-        let result = new Coordinates();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["Latitude"] = this.Latitude;
-        data["Longitude"] = this.Longitude;
-        return data;
-    }
-}
-
-export interface ICoordinates {
-    Latitude?: number;
-    Longitude?: number;
 }
 
 export class INavbarAction implements IINavbarAction {
@@ -362,13 +322,11 @@ export interface IINavbarAction {
 }
 
 export class LocationPostingDetails implements ILocationPostingDetails {
-    Country?: string | undefined;
+    Country!: string;
     City?: string | undefined;
     Address?: string | undefined;
     Latitude?: number | undefined;
     Longitude?: number | undefined;
-    readonly HasCoordinates?: boolean;
-    Coordinates?: Coordinates;
 
     constructor(data?: ILocationPostingDetails) {
         if (data) {
@@ -386,8 +344,6 @@ export class LocationPostingDetails implements ILocationPostingDetails {
             this.Address = _data["Address"];
             this.Latitude = _data["Latitude"];
             this.Longitude = _data["Longitude"];
-            (<any>this).HasCoordinates = _data["HasCoordinates"];
-            this.Coordinates = _data["Coordinates"] ? Coordinates.fromJS(_data["Coordinates"]) : <any>undefined;
         }
     }
 
@@ -405,28 +361,24 @@ export class LocationPostingDetails implements ILocationPostingDetails {
         data["Address"] = this.Address;
         data["Latitude"] = this.Latitude;
         data["Longitude"] = this.Longitude;
-        data["HasCoordinates"] = this.HasCoordinates;
-        data["Coordinates"] = this.Coordinates ? this.Coordinates.toJSON() : <any>undefined;
         return data;
     }
 }
 
 export interface ILocationPostingDetails {
-    Country?: string | undefined;
+    Country: string;
     City?: string | undefined;
     Address?: string | undefined;
     Latitude?: number | undefined;
     Longitude?: number | undefined;
-    HasCoordinates?: boolean;
-    Coordinates?: Coordinates;
 }
 
-export class PostingAuthorGetDto implements IPostingAuthorGetDto {
+export class PostingAuthorGet implements IPostingAuthorGet {
     Id?: number;
     Name?: string | undefined;
     Email?: string | undefined;
 
-    constructor(data?: IPostingAuthorGetDto) {
+    constructor(data?: IPostingAuthorGet) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -443,9 +395,9 @@ export class PostingAuthorGetDto implements IPostingAuthorGetDto {
         }
     }
 
-    static fromJS(data: any): PostingAuthorGetDto {
+    static fromJS(data: any): PostingAuthorGet {
         data = typeof data === 'object' ? data : {};
-        let result = new PostingAuthorGetDto();
+        let result = new PostingAuthorGet();
         result.init(data);
         return result;
     }
@@ -459,19 +411,19 @@ export class PostingAuthorGetDto implements IPostingAuthorGetDto {
     }
 }
 
-export interface IPostingAuthorGetDto {
+export interface IPostingAuthorGet {
     Id?: number;
     Name?: string | undefined;
     Email?: string | undefined;
 }
 
-export class PostingCreateDto implements IPostingCreateDto {
+export class PostingCreate implements IPostingCreate {
     Title!: string;
     Description!: string;
     ThumbnailUrl!: string;
-    Details!: PostingDetailsDto;
+    Details!: PostingDetails;
 
-    constructor(data?: IPostingCreateDto) {
+    constructor(data?: IPostingCreate) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -479,7 +431,7 @@ export class PostingCreateDto implements IPostingCreateDto {
             }
         }
         if (!data) {
-            this.Details = new PostingDetailsDto();
+            this.Details = new PostingDetails();
         }
     }
 
@@ -488,13 +440,13 @@ export class PostingCreateDto implements IPostingCreateDto {
             this.Title = _data["Title"];
             this.Description = _data["Description"];
             this.ThumbnailUrl = _data["ThumbnailUrl"];
-            this.Details = _data["Details"] ? PostingDetailsDto.fromJS(_data["Details"]) : new PostingDetailsDto();
+            this.Details = _data["Details"] ? PostingDetails.fromJS(_data["Details"]) : new PostingDetails();
         }
     }
 
-    static fromJS(data: any): PostingCreateDto {
+    static fromJS(data: any): PostingCreate {
         data = typeof data === 'object' ? data : {};
-        let result = new PostingCreateDto();
+        let result = new PostingCreate();
         result.init(data);
         return result;
     }
@@ -509,20 +461,20 @@ export class PostingCreateDto implements IPostingCreateDto {
     }
 }
 
-export interface IPostingCreateDto {
+export interface IPostingCreate {
     Title: string;
     Description: string;
     ThumbnailUrl: string;
-    Details: PostingDetailsDto;
+    Details: PostingDetails;
 }
 
-export class PostingDetailsDto implements IPostingDetailsDto {
+export class PostingDetails implements IPostingDetails {
     Pricing?: PricingPostingDetails;
     Vehicle?: VehiclePostingDetails;
     RealEstate?: RealEstatePostingDetails;
     Location?: LocationPostingDetails;
 
-    constructor(data?: IPostingDetailsDto) {
+    constructor(data?: IPostingDetails) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -540,9 +492,9 @@ export class PostingDetailsDto implements IPostingDetailsDto {
         }
     }
 
-    static fromJS(data: any): PostingDetailsDto {
+    static fromJS(data: any): PostingDetails {
         data = typeof data === 'object' ? data : {};
-        let result = new PostingDetailsDto();
+        let result = new PostingDetails();
         result.init(data);
         return result;
     }
@@ -557,21 +509,20 @@ export class PostingDetailsDto implements IPostingDetailsDto {
     }
 }
 
-export interface IPostingDetailsDto {
+export interface IPostingDetails {
     Pricing?: PricingPostingDetails;
     Vehicle?: VehiclePostingDetails;
     RealEstate?: RealEstatePostingDetails;
     Location?: LocationPostingDetails;
 }
 
-export class PostingGetDto_Detailed implements IPostingGetDto_Detailed {
-    General?: PostingGetDto_General;
+export class PostingGetDetailed implements IPostingGetDetailed {
+    General?: PostingGetGeneral;
     PictureUrls?: string[] | undefined;
-    AuthorId?: number;
-    Author?: PostingAuthorGetDto;
-    Details?: PostingDetailsDto;
+    Author?: PostingAuthorGet;
+    Details?: PostingDetails;
 
-    constructor(data?: IPostingGetDto_Detailed) {
+    constructor(data?: IPostingGetDetailed) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -582,21 +533,20 @@ export class PostingGetDto_Detailed implements IPostingGetDto_Detailed {
 
     init(_data?: any) {
         if (_data) {
-            this.General = _data["General"] ? PostingGetDto_General.fromJS(_data["General"]) : <any>undefined;
+            this.General = _data["General"] ? PostingGetGeneral.fromJS(_data["General"]) : <any>undefined;
             if (Array.isArray(_data["PictureUrls"])) {
                 this.PictureUrls = [] as any;
                 for (let item of _data["PictureUrls"])
                     this.PictureUrls!.push(item);
             }
-            this.AuthorId = _data["AuthorId"];
-            this.Author = _data["Author"] ? PostingAuthorGetDto.fromJS(_data["Author"]) : <any>undefined;
-            this.Details = _data["Details"] ? PostingDetailsDto.fromJS(_data["Details"]) : <any>undefined;
+            this.Author = _data["Author"] ? PostingAuthorGet.fromJS(_data["Author"]) : <any>undefined;
+            this.Details = _data["Details"] ? PostingDetails.fromJS(_data["Details"]) : <any>undefined;
         }
     }
 
-    static fromJS(data: any): PostingGetDto_Detailed {
+    static fromJS(data: any): PostingGetDetailed {
         data = typeof data === 'object' ? data : {};
-        let result = new PostingGetDto_Detailed();
+        let result = new PostingGetDetailed();
         result.init(data);
         return result;
     }
@@ -609,29 +559,27 @@ export class PostingGetDto_Detailed implements IPostingGetDto_Detailed {
             for (let item of this.PictureUrls)
                 data["PictureUrls"].push(item);
         }
-        data["AuthorId"] = this.AuthorId;
         data["Author"] = this.Author ? this.Author.toJSON() : <any>undefined;
         data["Details"] = this.Details ? this.Details.toJSON() : <any>undefined;
         return data;
     }
 }
 
-export interface IPostingGetDto_Detailed {
-    General?: PostingGetDto_General;
+export interface IPostingGetDetailed {
+    General?: PostingGetGeneral;
     PictureUrls?: string[] | undefined;
-    AuthorId?: number;
-    Author?: PostingAuthorGetDto;
-    Details?: PostingDetailsDto;
+    Author?: PostingAuthorGet;
+    Details?: PostingDetails;
 }
 
-export class PostingGetDto_General implements IPostingGetDto_General {
+export class PostingGetGeneral implements IPostingGetGeneral {
     Id?: number;
     Title?: string | undefined;
     Description?: string | undefined;
     ThumbnailUrl?: string | undefined;
     DatePosted?: Date;
 
-    constructor(data?: IPostingGetDto_General) {
+    constructor(data?: IPostingGetGeneral) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -650,9 +598,9 @@ export class PostingGetDto_General implements IPostingGetDto_General {
         }
     }
 
-    static fromJS(data: any): PostingGetDto_General {
+    static fromJS(data: any): PostingGetGeneral {
         data = typeof data === 'object' ? data : {};
-        let result = new PostingGetDto_General();
+        let result = new PostingGetGeneral();
         result.init(data);
         return result;
     }
@@ -668,7 +616,7 @@ export class PostingGetDto_General implements IPostingGetDto_General {
     }
 }
 
-export interface IPostingGetDto_General {
+export interface IPostingGetGeneral {
     Id?: number;
     Title?: string | undefined;
     Description?: string | undefined;
@@ -676,54 +624,10 @@ export interface IPostingGetDto_General {
     DatePosted?: Date;
 }
 
-export class PriceRange implements IPriceRange {
-    Min?: number;
-    Max?: number;
-
-    constructor(data?: IPriceRange) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.Min = _data["Min"];
-            this.Max = _data["Max"];
-        }
-    }
-
-    static fromJS(data: any): PriceRange {
-        data = typeof data === 'object' ? data : {};
-        let result = new PriceRange();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["Min"] = this.Min;
-        data["Max"] = this.Max;
-        return data;
-    }
-}
-
-export interface IPriceRange {
-    Min?: number;
-    Max?: number;
-}
-
 export class PricingPostingDetails implements IPricingPostingDetails {
-    BargainKinds?: BargainKinds;
+    BargainKinds!: BargainKinds;
     Price?: number | undefined;
     PriceMax?: number | undefined;
-    readonly IsPriceNegotiable?: boolean;
-    readonly HasPrice?: boolean;
-    readonly HasPriceRange?: boolean;
-    PriceRange?: PriceRange;
 
     constructor(data?: IPricingPostingDetails) {
         if (data) {
@@ -739,10 +643,6 @@ export class PricingPostingDetails implements IPricingPostingDetails {
             this.BargainKinds = _data["BargainKinds"];
             this.Price = _data["Price"];
             this.PriceMax = _data["PriceMax"];
-            (<any>this).IsPriceNegotiable = _data["IsPriceNegotiable"];
-            (<any>this).HasPrice = _data["HasPrice"];
-            (<any>this).HasPriceRange = _data["HasPriceRange"];
-            this.PriceRange = _data["PriceRange"] ? PriceRange.fromJS(_data["PriceRange"]) : <any>undefined;
         }
     }
 
@@ -758,22 +658,14 @@ export class PricingPostingDetails implements IPricingPostingDetails {
         data["BargainKinds"] = this.BargainKinds;
         data["Price"] = this.Price;
         data["PriceMax"] = this.PriceMax;
-        data["IsPriceNegotiable"] = this.IsPriceNegotiable;
-        data["HasPrice"] = this.HasPrice;
-        data["HasPriceRange"] = this.HasPriceRange;
-        data["PriceRange"] = this.PriceRange ? this.PriceRange.toJSON() : <any>undefined;
         return data;
     }
 }
 
 export interface IPricingPostingDetails {
-    BargainKinds?: BargainKinds;
+    BargainKinds: BargainKinds;
     Price?: number | undefined;
     PriceMax?: number | undefined;
-    IsPriceNegotiable?: boolean;
-    HasPrice?: boolean;
-    HasPriceRange?: boolean;
-    PriceRange?: PriceRange;
 }
 
 export class ProblemDetails implements IProblemDetails {
@@ -851,10 +743,10 @@ export enum RealEstateKind {
 }
 
 export class RealEstatePostingDetails implements IRealEstatePostingDetails {
-    Kind?: RealEstateKind;
-    SpacePurpose?: RealEstateSpacePurpose;
-    Area?: number;
-    Rooms?: number;
+    Kind!: RealEstateKind;
+    SpacePurpose!: RealEstateSpacePurpose;
+    Area!: number;
+    Rooms!: number;
 
     constructor(data?: IRealEstatePostingDetails) {
         if (data) {
@@ -892,10 +784,10 @@ export class RealEstatePostingDetails implements IRealEstatePostingDetails {
 }
 
 export interface IRealEstatePostingDetails {
-    Kind?: RealEstateKind;
-    SpacePurpose?: RealEstateSpacePurpose;
-    Area?: number;
-    Rooms?: number;
+    Kind: RealEstateKind;
+    SpacePurpose: RealEstateSpacePurpose;
+    Area: number;
+    Rooms: number;
 }
 
 /** 0 = Residential 1 = Commercial 2 = Industrial 3 = Any 4 = Other */
@@ -908,9 +800,9 @@ export enum RealEstateSpacePurpose {
 }
 
 export class VehiclePostingDetails implements IVehiclePostingDetails {
-    Year?: number;
-    Manufacturer?: string | undefined;
-    Model?: string | undefined;
+    Year!: number;
+    Manufacturer!: string;
+    Model!: string;
 
     constructor(data?: IVehiclePostingDetails) {
         if (data) {
@@ -946,9 +838,9 @@ export class VehiclePostingDetails implements IVehiclePostingDetails {
 }
 
 export interface IVehiclePostingDetails {
-    Year?: number;
-    Manufacturer?: string | undefined;
-    Model?: string | undefined;
+    Year: number;
+    Manufacturer: string;
+    Model: string;
 }
 
 export class ApiException extends Error {

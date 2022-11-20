@@ -1,17 +1,28 @@
 ﻿import './api-client';
 import {
-    PostingCreateDto,
+    PostingCreate,
 } from "./api-client";
 import {getType,Type} from "tst-reflect";
 
 export {}
+
+
+class A
+{
+    s?: string | undefined;
+}
+console.warn(getType<number|string>().types);
+console.warn(getType<A>().getProperties().find(p => p.name == "s")!.type.types);
+
+console.warn("sdsdds");
+
 
 initializePostingForm();
 
 function initializePostingForm()
 {
     const form = document.querySelector(`form[name="postingForm"]`) as HTMLFormElement;
-    validateForm(form, getType<PostingCreateDto>());
+    validateForm(form, getType<PostingCreate>());
 
     form.addEventListener("submit", function (event)
     {
@@ -20,7 +31,7 @@ function initializePostingForm()
         const formData = new FormData(form);
 
         // @ts-ignore
-        const dto = mapShallowObject(formData) as PostingCreateDto;
+        const dto = mapShallowObject(formData) as PostingCreate;
         
         debugger;
     });

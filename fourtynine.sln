@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fourtynine.DataAccess", "so
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fourtynine.Playground", "source\fourtynine.Playground\fourtynine.Playground.csproj", "{5C88E11E-4CF7-4F33-B6C9-093A92FB448B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fourtynine.SqlServerMigrations", "source\fourtynine.SqlServerMigrations\fourtynine.SqlServerMigrations.csproj", "{A41F84DF-E681-4791-932D-7D8827234413}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fourtynine.UnitTests", "source\fourtynine.UnitTests\fourtynine.UnitTests.csproj", "{EB37BF0F-596D-4FBF-9A0A-C476E2C88B6E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,10 +36,10 @@ Global
 		{5C88E11E-4CF7-4F33-B6C9-093A92FB448B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5C88E11E-4CF7-4F33-B6C9-093A92FB448B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5C88E11E-4CF7-4F33-B6C9-093A92FB448B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A41F84DF-E681-4791-932D-7D8827234413}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A41F84DF-E681-4791-932D-7D8827234413}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A41F84DF-E681-4791-932D-7D8827234413}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A41F84DF-E681-4791-932D-7D8827234413}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB37BF0F-596D-4FBF-9A0A-C476E2C88B6E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB37BF0F-596D-4FBF-9A0A-C476E2C88B6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB37BF0F-596D-4FBF-9A0A-C476E2C88B6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB37BF0F-596D-4FBF-9A0A-C476E2C88B6E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection

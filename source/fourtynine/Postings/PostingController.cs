@@ -1,4 +1,6 @@
-﻿using fourtynine.DataAccess;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using fourtynine.DataAccess;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,10 +17,12 @@ public class SearchQuery
 public class PostingApiService
 {
     public PostingsDbContext DbContext { get; }
+    public IMapper Mapper { get; }
 
-    public PostingApiService(PostingsDbContext dbContext)
+    public PostingApiService(PostingsDbContext dbContext, IMapper mapper)
     {
         DbContext = dbContext;
+        Mapper = mapper;
     }
 }
 public static class PostingApiServiceExtensions
@@ -28,23 +32,29 @@ public static class PostingApiServiceExtensions
     {
         return api.DbContext.Postings
             .Where(p => p.Id == id)
-            .MapToGetDto_General()
+            .ProjectTo<PostingGetDto_General>(api.Mapper)
             .FirstOrDefaultAsync();
     }
+    
+    public static IQueryable<T> ProjectTo<T>(this IQueryable query, IMapper mapper)
+    {
+        return mapper.ProjectTo<T>(query);
+    }
+    
 
     public static Task<PostingGetDto_Detailed?> GetDetailed(
         this PostingApiService api, int id)
     {
         return api.DbContext.Postings
             .Where(p => p.Id == id)
-            .MapToGetDto_Detailed()
+            .ProjectTo<PostingGetDto_Detailed>(api.Mapper)
             .FirstOrDefaultAsync();
     }
     
     public static async Task<Posting> Create(
         this PostingApiService api, PostingCreateDto dto)
     {
-        var posting = dto.MapToEntity();
+        var posting = api.Mapper.Map<Posting>(dto);
         api.DbContext.Postings.Add(posting);
         await api.DbContext.SaveChangesAsync();
         return posting;
@@ -61,7 +71,9 @@ public static class PostingApiServiceExtensions
         // if (query.Blah)
         //      postings = postings.Where(Blah);
 
-        return await postings.MapToGetDto_General().ToListAsync();
+        return await postings
+            .ProjectTo<PostingGetDto_General>(api.Mapper)
+            .ToListAsync();
     }
 }
 
@@ -119,7 +131,7 @@ public class PostingController : Controller
         return CreatedAtAction(
             nameof(GetDetailed),
             new { id = posting.Id }, 
-            posting.MapToGetDto_Detailed());
+            _api.Mapper.Map<PostingGetDto_Detailed>(posting));
     }
     
 }

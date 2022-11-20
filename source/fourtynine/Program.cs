@@ -46,6 +46,11 @@ builder.Services.AddDbContext<PostingsDbContext>(options =>
     options.UseSqlServer(connectionString);
 });
 
+builder.Services.AddAutoMapper(options =>
+{
+    options.AddProfile<PostingMapperProfile>();
+});
+
 if (!isDevelopment)
     builder.Services.AddDirectoryBrowser();
 
@@ -69,6 +74,9 @@ builder.Services.AddSwaggerGen(options =>
             Url = new Uri("https://example.com/license")
         },
     });
+    options.CustomSchemaIds(t => t.Name
+        .Replace("Dto_", "")
+        .Replace("Dto", ""));
     options.AddEnumsWithValuesFixFilters();
 });
 
