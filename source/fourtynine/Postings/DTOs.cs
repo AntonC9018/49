@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Linq.Expressions;
 using fourtynine.DataAccess;
 using LinqKit;
 using Microsoft.EntityFrameworkCore;
@@ -21,10 +22,41 @@ public sealed class PostingGetDto_General
 
 public sealed class PostingDetailsDto
 {
-    public PricingPostingDetails? Pricing { get; set; } 
-    public VehiclePostingDetails? Vehicle { get; set; } 
-    public RealEstatePostingDetails? RealEstate { get; set; } 
-    public LocationPostingDetails? Location { get; set; } 
+    public PricingPostingDetailsDto? Pricing { get; set; } 
+    public VehiclePostingDetailsDto? Vehicle { get; set; } 
+    public RealEstatePostingDetailsDto? RealEstate { get; set; } 
+    public LocationPostingDetailsDto? Location { get; set; } 
+}
+
+public class PricingPostingDetailsDto : IPricingPostingDetails
+{
+    [Required] public BargainKinds BargainKinds { get; set; }
+    [Required] public decimal? Price { get; set; }
+    [Required] public decimal? PriceMax { get; set; }
+}
+
+public sealed class VehiclePostingDetailsDto : IVehiclePostingDetails
+{
+    [Required] public int Year { get; set; }
+    [Required] public string Manufacturer { get; set; }
+    [Required] public string Model { get; set; }
+}
+
+public sealed class RealEstatePostingDetailsDto : IRealEstatePostingDetails
+{
+    [Required] public RealEstateKind Kind { get; set; }
+    [Required] public RealEstateSpacePurpose SpacePurpose { get; set; }
+    [Required] public float Area { get; set; }
+    [Required] public int Rooms { get; set; }
+}
+
+public sealed class LocationPostingDetailsDto : ILocationPostingDetails
+{
+    [Required] public string Country { get; set; }
+    [Required] public string? City { get; set; }
+    [Required] public string? Address { get; set; }
+    [Required] public double? Latitude { get; set; }
+    [Required] public double? Longitude { get; set; }
 }
 
 public sealed class PostingGetDto_Detailed
@@ -45,18 +77,117 @@ public sealed class PostingAuthorGetDto
 
 public sealed class PostingCreateDto
 {
+    [Required]
     public string Title { get; set; }
+    [Required]
     public string Description { get; set; }
+    [Required]
     public string ThumbnailUrl { get; set; }
+    [Required]
     public PostingDetailsDto Details { get; set; }
 }
 
 #pragma warning restore 8618 // Disable nullability warnings
 
+public struct Mapping<TFrom, TTo>
+{
+    public Expression<Func<TFrom, TTo>> Expression { get; }
+    public Func<TFrom, TTo> Func { get; }
+    public Mapping(Expression<Func<TFrom, TTo>> expression)
+    {
+        Expression = expression;
+        Func = expression.Compile();
+    }
+    
+    public static implicit operator Mapping<TFrom, TTo>(Expression<Func<TFrom, TTo>> expression)
+        => new Mapping<TFrom, TTo>(expression);
+}
+
 public static partial class MappingExtensions
 {
+    public static Mapping<TFrom, TTo> To<TFrom, TTo>(this Expression<Func<TFrom, TTo>> expression)
+    {
+        return new Mapping<TFrom, TTo>(expression);
+    }
+}
+
+public static partial class MappingExtensions
+{
+    // Yeah, I definitely need automapper, this is way too much boilerplate.
+    
+    private static readonly Mapping<PricingPostingDetails, PricingPostingDetailsDto> FromPricingDetailsMapping = new(
+        x => new PricingPostingDetailsDto
+        {
+            BargainKinds = x.BargainKinds,
+            Price = x.Price,
+            PriceMax = x.PriceMax
+        });
+
+    private static readonly Mapping<LocationPostingDetails, LocationPostingDetailsDto> FromLocationDetailsMapping = new(
+        x => new LocationPostingDetailsDto()
+        {
+            Country = x.Country,
+            City = x.City,
+            Address = x.Address,
+            Latitude = x.Latitude,
+            Longitude = x.Longitude
+        });
+
+    private static readonly Mapping<VehiclePostingDetails, VehiclePostingDetailsDto> FromVehicleDetailsMapping = new(
+        x => new VehiclePostingDetailsDto
+        {
+            Year = x.Year,
+            Manufacturer = x.Manufacturer,
+            Model = x.Model,
+        });
+
+    private static readonly Mapping<RealEstatePostingDetails, RealEstatePostingDetailsDto> FromRealEstateDetailsMapping = new(
+        x => new RealEstatePostingDetailsDto
+        {
+            Kind = x.Kind,
+            SpacePurpose = x.SpacePurpose,
+            Area = x.Area,
+            Rooms = x.Rooms
+        });
+    
+    private static readonly Mapping<PricingPostingDetailsDto, PricingPostingDetails> ToPricingDetailsMapping = new(
+        x => new PricingPostingDetails
+        {
+            BargainKinds = x.BargainKinds,
+            Price = x.Price,
+            PriceMax = x.PriceMax
+        });
+
+    private static readonly Mapping<LocationPostingDetailsDto, LocationPostingDetails> ToLocationDetailsMapping = new(
+        x => new LocationPostingDetails
+        {
+            Country = x.Country,
+            City = x.City,
+            Address = x.Address,
+            Latitude = x.Latitude,
+            Longitude = x.Longitude
+        });
+
+    private static readonly Mapping<VehiclePostingDetailsDto, VehiclePostingDetails> ToVehicleDetailsMapping = new(
+        x => new VehiclePostingDetails
+        {
+            Year = x.Year,
+            Manufacturer = x.Manufacturer,
+            Model = x.Model,
+        });
+
+    private static readonly Mapping<RealEstatePostingDetailsDto, RealEstatePostingDetails> ToRealEstateDetailsMapping = new(
+        x => new RealEstatePostingDetails
+        {
+            Kind = x.Kind,
+            SpacePurpose = x.SpacePurpose,
+            Area = x.Area,
+            Rooms = x.Rooms
+        });
+
+    
     // TODO: Maybe do this with AutoMapper.
-    private static readonly Expression<Func<Posting, PostingGetDto_Detailed>> _MapToGetDto_Detailed_Expr =
+    private static readonly Mapping<Posting, PostingGetDto_Detailed> ToPostingMapping = new(
         x => new PostingGetDto_Detailed
         {
             General = new PostingGetDto_General
@@ -77,12 +208,12 @@ public static partial class MappingExtensions
             },
             Details = new PostingDetailsDto
             {
-                Pricing = x.Pricing,
+                Pricing = ToPricingDetailsMapping.Expression.Expand(x),
                 Vehicle = x.Vehicle,
                 RealEstate = x.RealEstate,
                 Location = x.Location,
             },
-        };
+        });
 
     private static readonly Func<Posting, PostingGetDto_Detailed> _MapToGetDto_Detailed_Impl =
         _MapToGetDto_Detailed_Expr.Compile();

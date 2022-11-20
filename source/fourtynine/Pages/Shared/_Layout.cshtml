@@ -9,6 +9,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - fourtynine</title>
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700" rel="stylesheet" />
+    
+    <environment include="Development">
+      <script type="module" src="/@@vite/client"></script>
+      <script type="module" src="/src/main.ts"></script>
+    </environment>
+  
+    <environment exclude="Development">
+      <ImportFile path="src/main.ts"></ImportFile>
+      <ImportFile path="src/main.css"></ImportFile>
+    </environment>
 </head>
 
 @* https://github.com/tailwindtoolbox/Landing-Page/blob/master/index.html *@
@@ -198,14 +208,6 @@
 
   @await RenderSectionAsync("Scripts", required: false)
 
-  <environment include="Development">
-    <script type="module" src="/@@vite/client"></script>
-    <script type="module" src="/src/main.ts"></script>
-  </environment>
 
-  <environment exclude="Development">
-    <ImportFile path="src/main.ts"></ImportFile>
-    <ImportFile path="src/main.css"></ImportFile>
-  </environment>
 </body>
 </html>

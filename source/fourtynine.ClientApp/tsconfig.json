@@ -13,7 +13,12 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "plugins": [
+      {
+        "transform": "tst-reflect-transformer"
+      }
+    ]
   },
   "include": ["src"]
 }

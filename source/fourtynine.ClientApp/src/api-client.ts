@@ -466,10 +466,10 @@ export interface IPostingAuthorGetDto {
 }
 
 export class PostingCreateDto implements IPostingCreateDto {
-    Title?: string | undefined;
-    Description?: string | undefined;
-    ThumbnailUrl?: string | undefined;
-    Details?: PostingDetailsDto;
+    Title!: string;
+    Description!: string;
+    ThumbnailUrl!: string;
+    Details!: PostingDetailsDto;
 
     constructor(data?: IPostingCreateDto) {
         if (data) {
@@ -478,6 +478,9 @@ export class PostingCreateDto implements IPostingCreateDto {
                     (<any>this)[property] = (<any>data)[property];
             }
         }
+        if (!data) {
+            this.Details = new PostingDetailsDto();
+        }
     }
 
     init(_data?: any) {
@@ -485,7 +488,7 @@ export class PostingCreateDto implements IPostingCreateDto {
             this.Title = _data["Title"];
             this.Description = _data["Description"];
             this.ThumbnailUrl = _data["ThumbnailUrl"];
-            this.Details = _data["Details"] ? PostingDetailsDto.fromJS(_data["Details"]) : <any>undefined;
+            this.Details = _data["Details"] ? PostingDetailsDto.fromJS(_data["Details"]) : new PostingDetailsDto();
         }
     }
 
@@ -507,10 +510,10 @@ export class PostingCreateDto implements IPostingCreateDto {
 }
 
 export interface IPostingCreateDto {
-    Title?: string | undefined;
-    Description?: string | undefined;
-    ThumbnailUrl?: string | undefined;
-    Details?: PostingDetailsDto;
+    Title: string;
+    Description: string;
+    ThumbnailUrl: string;
+    Details: PostingDetailsDto;
 }
 
 export class PostingDetailsDto implements IPostingDetailsDto {

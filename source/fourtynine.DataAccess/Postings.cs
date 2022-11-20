@@ -55,15 +55,10 @@ public sealed class Posting
     // 
 }
 
-public class Picture
+public sealed class Picture
 {
-    [Required]
     public long Id { get; set; }
-    
-    [Required]
     public string Url { get; set; }
-    
-    [Required]
     public long PostingId { get; set; }
     public Posting Posting { get; set; }
 }
@@ -87,10 +82,8 @@ public enum BargainKinds
     BuyOrLease = Buy | Lease,
 }
 
-public readonly record struct PriceRange(decimal Min, decimal Max);
-
 [Owned]
-public sealed class PricingPostingDetails
+public sealed class PricingPostingDetails : IPricingPostingDetails
 {
     [Column(TypeName = "tinyint")]
     public BargainKinds BargainKinds { get; set; }
@@ -99,37 +92,11 @@ public sealed class PricingPostingDetails
     public decimal? Price { get; set; }
     
     [Column(TypeName = "money")]
-    [NotNullIfNotNull(nameof(Price))]
     public decimal? PriceMax { get; set; }
-    
-    [MemberNotNullWhen(returnValue: false, nameof(Price))]
-    public bool IsPriceNegotiable => !Price.HasValue;
-    
-    [MemberNotNullWhen(returnValue: true, nameof(Price))]
-    public bool HasPrice => Price.HasValue;
-    
-    [MemberNotNullWhen(returnValue: true, nameof(Price), nameof(PriceMax))]
-    public bool HasPriceRange => Price is not null && PriceMax is not null;
-    
-    [NotMapped]
-    public PriceRange PriceRange
-    {
-        get
-        {
-            Debug.Assert(HasPriceRange,
-            "Must check IsPriceNegotiable prior to taking the price minimum.");
-            return new PriceRange(Price!.Value, PriceMax.Value);
-        }
-        set
-        {
-            Price = value.Min;
-            PriceMax = value.Max;
-        }
-    }
 }
 
 [Owned]
-public sealed class VehiclePostingDetails
+public sealed class VehiclePostingDetails : IVehiclePostingDetails
 {
     public int Year { get; set; }
     
@@ -140,27 +107,8 @@ public sealed class VehiclePostingDetails
     public string Model { get; set; }
 }
 
-public enum RealEstateKind
-{
-    House,
-    Apartment,
-    Condo,
-    Townhouse,
-    Land,
-    Other,
-}
-
-public enum RealEstateSpacePurpose
-{
-    Residential,
-    Commercial,
-    Industrial,
-    Any,
-    Other,
-}
-
 [Owned]
-public sealed class RealEstatePostingDetails
+public sealed class RealEstatePostingDetails : IRealEstatePostingDetails
 {
     [Column(TypeName = "varchar(16)")]
     public RealEstateKind Kind { get; set; }
@@ -175,10 +123,8 @@ public sealed class RealEstatePostingDetails
     public int Rooms { get; set; }
 }
 
-public readonly record struct Coordinates(double Latitude, double Longitude); 
-
 [Owned]
-public sealed class LocationPostingDetails
+public sealed class LocationPostingDetails : ILocationPostingDetails
 {
     [MaxLength(100)]
     public string Country { get; set; }
@@ -195,25 +141,6 @@ public sealed class LocationPostingDetails
 
     [NotNullIfNotNull(nameof(Latitude))]
     public double? Longitude { get; set; }
-
-    [MemberNotNullWhen(returnValue: true, nameof(Latitude))]
-    public bool HasCoordinates => Latitude.HasValue;
-    
-    [NotMapped]
-    public Coordinates Coordinates
-    {
-        get
-        {
-            Debug.Assert(HasCoordinates, 
-                "Check if it has coordinates prior to getting them.");
-            return new Coordinates(Latitude!.Value, Longitude!.Value);
-        }
-        set
-        {
-            Latitude = value.Latitude;
-            Longitude = value.Longitude;
-        }
-    }
 }
 
 // [Owned]
