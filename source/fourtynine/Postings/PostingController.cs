@@ -43,7 +43,7 @@ public static class PostingApiServiceExtensions
     
 
     public static Task<PostingGetDto_Detailed?> GetDetailed(
-        this PostingApiService api, int id)
+        this PostingApiService api, long id)
     {
         return api.DbContext.Postings
             .Where(p => p.Id == id)
@@ -74,6 +74,13 @@ public static class PostingApiServiceExtensions
         return await postings
             .ProjectTo<PostingGetDto_General>(api.Mapper)
             .ToListAsync();
+    }
+
+    public static string GetSlug(this IPostingIdentification posting)
+    {
+        // TODO: slugify the title
+        string slug = posting.Title;
+        return slug;
     }
 }
 

@@ -10,7 +10,7 @@ namespace fourtynine.DataAccess;
 
 #pragma warning disable 8618 // Disable nullability warnings for EF Core
 
-public sealed class Posting
+public sealed class Posting : IPostingIdentification
 {
     [Required]
     public long Id { get; set; }
@@ -148,9 +148,6 @@ public sealed class LocationPostingDetails : ILocationPostingDetails
 // {
 // }
 
-
-#pragma warning restore 8618 // Disable nullability warnings for EF Core
-
 public sealed class PostingsDbContext : DbContext
 {
     public DbSet<Posting> Postings { get; set; }
@@ -176,3 +173,5 @@ public sealed class PostingsDbContext : DbContext
             .WithOne(p => p.Posting);
     }
 }
+
+#pragma warning restore 8618 // Disable nullability warnings for EF Core

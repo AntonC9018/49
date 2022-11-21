@@ -1,5 +1,11 @@
 ﻿namespace fourtynine.DataAccess;
 
+public interface IPostingIdentification
+{
+    long Id { get; }
+    string Title { get; }
+}
+
 public readonly record struct PriceRange(decimal Min, decimal Max);
 
 public interface IPricingPostingDetails
@@ -76,11 +82,11 @@ public interface ILocationPostingDetails
 
 public static class LocationPostingDetailsExtensions
 {
-    public static Coordinates GetCoordinates(this ILocationPostingDetails i)
+    public static Coordinates? GetCoordinates(this ILocationPostingDetails i)
     {
         if (i.Latitude is not null && i.Longitude is not null)
             return new Coordinates(i.Latitude.Value, i.Longitude.Value);
-        return default;
+        return null;
     }
     
     public static void SetCoordinates(this ILocationPostingDetails i, Coordinates? coordinates)

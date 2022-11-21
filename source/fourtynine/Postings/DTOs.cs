@@ -5,7 +5,7 @@ namespace fourtynine.Postings;
 
 #pragma warning disable 8618 // Disable nullability warnings
 
-public sealed class PostingGetDto_General
+public sealed class PostingGetDto_General : IPostingIdentification
 {
     public long Id { get; set; }
     public string Title { get; set; }
@@ -56,12 +56,15 @@ public sealed class LocationPostingDetailsDto : ILocationPostingDetails
     public double? Longitude { get; set; }
 }
 
-public sealed class PostingGetDto_Detailed
+public sealed class PostingGetDto_Detailed : IPostingIdentification
 {
     public PostingGetDto_General General { get; set; }
     public List<string> PictureUrls { get; set; }
     public PostingAuthorGetDto Author { get; set; }
     public PostingDetailsDto Details { get; set; }
+
+    public long Id => General.Id;
+    public string Title => General.Title;
 }
 
 public sealed class PostingAuthorGetDto
