@@ -57,6 +57,7 @@ public static class InputTypeExtensions
     }
 }
 
+
 public abstract class PartialRazorTagHelperBase<TModel> : TagHelper
 {
     protected IHtmlHelper HtmlHelper { get; }
@@ -82,8 +83,7 @@ public abstract class PartialRazorTagHelperBase<TModel> : TagHelper
         
         var content = await HtmlHelper.PartialAsync(partialPath, model);
         
-        output.TagName = "div";
-        output.TagMode = TagMode.StartTagAndEndTag;
+        output.TagName = "";
         output.Content.SetHtmlContent(content);
     } 
 }

@@ -28,6 +28,7 @@
     @* Autogenerate to an extent?  *@
     @* There's too many things that are easy to miss. *@
     
+    @Html.MakeEditor(m => m.Posting.Title)
     <FormInput
       for="Posting.Title"
       input-type="@(FormInputType.Text)">

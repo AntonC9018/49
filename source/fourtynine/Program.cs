@@ -27,10 +27,16 @@ builder.Services.AddControllers(options =>
     options.JsonSerializerOptions.DictionaryKeyPolicy = null;
 });
 
-builder.Services.AddRazorPages()
-    .WithRazorPagesRoot("/Pages")
-    // Razor pages don't recompile = css in the html doesn't update.
-    .AddRazorRuntimeCompilation();
+{
+    var razor = builder.Services.AddRazorPages()
+        .WithRazorPagesRoot("/Pages");
+    
+    if (isDevelopment)
+    {
+        // Razor pages don't recompile = css in the html doesn't update.
+        razor.AddRazorRuntimeCompilation();
+    }
+}
 
 builder.Services.AddDbContext<PostingsDbContext>(options =>
 {

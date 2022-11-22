@@ -8,11 +8,11 @@ namespace fourtynine.Partials;
 
 public record FormInputModel(
     string Label,
-    string Expression,
+    ModelExpression Expression,
     FormInputType InputType,
     string PlaceHolder)
 {
-    public string Id => Expression;
+    public string Id => Expression.Name;
 }
 
 public enum FormInputType
@@ -53,6 +53,11 @@ public static class FormInputTypeExtensions
     }
 }
 
+// The validation and all the rest will have to be done manually,
+// because Razor makes it ridiculously complicated to pass model expressions
+// to tag helpers.
+// See: https://stackoverflow.com/a/55474543/9731532
+// Also useful: https://cpratt.co/displaytemplates-and-editortemplates-for-fun-and-profit/
 [HtmlTargetElement("FormInput")]
 public class FormInputTagHelper : PartialRazorTagHelperBase<FormInputModel>
 {
@@ -76,7 +81,7 @@ public class FormInputTagHelper : PartialRazorTagHelperBase<FormInputModel>
         
         return new FormInputModel(
             Label: Label,
-            Expression: For.Name,
+            Expression: For,
             InputType: InputType,
             PlaceHolder: PlaceHolder);
     }
