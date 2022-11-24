@@ -1,4 +1,8 @@
-﻿#if DEVELOPMENT && !USE_YARP
+﻿// This is the other implementation, which doesn't quite work
+// If I use this implementation, the other api controllers never get hit
+// for some reason. I have no idea why honestly: the order of this proxy route
+// is larger than the order of the other routes, so it should be hit last.
+#if DEVELOPMENT && !USE_YARP && false
 
 using AspNetCore.Proxy;
 using Microsoft.AspNetCore.Mvc;

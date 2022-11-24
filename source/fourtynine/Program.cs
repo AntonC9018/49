@@ -158,4 +158,24 @@ app.UseEndpoints(endpoints =>
 #endif
 });
 
+// The minimal API implementation seems to be the only thing that works correctly.
+// It allows the api controllers to get hit, it allows swagger to load, it
+// lets the razor pages work, and it proxies the other requests correctly too, including
+// the websocket requests.
+// See the controller implementation in `Development/ViteProxyController.cs`
+#if !USE_YARP
+if (isDevelopment)
+{
+    const string vitePort = "5173";
+
+    app.UseProxies(proxies =>
+    {
+        proxies.Map("/vite-ws", proxy => proxy
+            .UseWs($"wss://localhost:{vitePort}/vite-ws"));
+        proxies.Map("/{**all}", proxy => proxy
+            .UseHttp((_, args) => $"https://localhost:{vitePort}/{args["all"]}"));
+    });
+}
+#endif
+
 app.Run();
