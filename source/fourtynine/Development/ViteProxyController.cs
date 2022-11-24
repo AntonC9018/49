@@ -1,5 +1,5 @@
-﻿#if DEVELOPMENT
-using System.Diagnostics;
+﻿#if DEVELOPMENT && !USE_YARP
+
 using AspNetCore.Proxy;
 using Microsoft.AspNetCore.Mvc;
 

@@ -1,6 +1,4 @@
-﻿using System.Net.Mime;
-using AspNetCore.Proxy;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace fourtynine;
 
@@ -8,7 +6,7 @@ using static RoutingHelper;
 
 [ApiRoute]
 [ApiControllerConvention]
-[ApiExplorerSettings(IgnoreApi = true)]
+// [ApiExplorerSettings(IgnoreApi = true)]
 public class StuffController : Controller
 {
     private readonly LinkGenerator _linkGenerator;

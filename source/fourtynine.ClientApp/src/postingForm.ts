@@ -28,20 +28,35 @@ function initializePostingForm()
         toggle();
     });
     
-    const client = new Client();
+    const client = new Client(undefined, {
+        // Custom fetch implementation that adds the anti-forgery token.
+        fetch: (url: RequestInfo, init?: RequestInit): Promise<Response> =>
+        {
+            init ??= {};
+            init.headers ??= {};
+
+            const xsrfToken = document.querySelector(`input[name="__RequestVerificationToken"]`) as HTMLInputElement;
+
+            // the generated code only uses the dictionary convention.
+            const headers = <Record<string, string>> init.headers;
+            
+            // https://learn.microsoft.com/en-us/aspnet/web-api/overview/security/preventing-cross-site-request-forgery-csrf-attacks#anti-csrf-and-ajax
+            headers["RequestVerificationToken"] = xsrfToken.value;
+
+            return fetch(url, init);
+        }
+    });
     form.addEventListener("submit", async function (event)
     {
         event.preventDefault();
         const form = event.target as HTMLFormElement;
         const formData = new FormData(form);
-
-        // @ts-ignore
         const dto = mapShallowObject(formData) as PostingCreate;
+        
         try
         {
             const response = await client.postingPOST(dto);
-            window.history.pushState({}, "", 
-                `/postings/${response.General.Id}/${response.General.Slug}`);            
+            window.location.assign(`/Postings/${response.General.Id}/${response.General.Slug}`);            
         }
         catch (e: any)
         {

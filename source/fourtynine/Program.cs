@@ -1,16 +1,12 @@
-using System.Diagnostics;
-using System.Text.Json;
+#if !USE_YARP
 using AspNetCore.Proxy;
+#endif
 using fourtynine;
 using fourtynine.DataAccess;
 using fourtynine.Development;
 using fourtynine.Navbar;
 using fourtynine.Postings;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.FileProviders;
-using Microsoft.FeatureManagement;
 using Microsoft.OpenApi.Models;
 using Unchase.Swashbuckle.AspNetCore.Extensions.Extensions;
 
@@ -26,6 +22,14 @@ builder.Services.AddControllers(options =>
     options.JsonSerializerOptions.PropertyNamingPolicy = null;
     options.JsonSerializerOptions.DictionaryKeyPolicy = null;
 });
+
+#if USE_YARP
+if (isDevelopment)
+{
+    var proxy = builder.Services.AddReverseProxy();
+    proxy.LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
+}
+#endif
 
 {
     var razor = builder.Services.AddRazorPages()
@@ -86,10 +90,10 @@ builder.Services.AddSwaggerGen(options =>
     options.AddEnumsWithValuesFixFilters();
 });
 
+#if !USE_YARP
 if (isDevelopment)
-{
     builder.Services.AddProxies();
-}
+#endif
 
 builder.Services.AddSingleton<INavbarActionsService, NavbarActionsService>();
 
@@ -133,9 +137,9 @@ if (!isDevelopment)
 }
 
 app.UseHttpsRedirection();
-app.UseRouting();
 app.UseAuthentication();
 app.UseWebSockets();
+app.UseRouting();
 
 if (isDevelopment)
 {
@@ -146,12 +150,12 @@ if (isDevelopment)
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapRazorPages();
-    
-    // endpoints.MapControllerRoute(
-    //     name: "default",
-    //     pattern: "{controller=Home}/{action=Index}/{id?}");
-
     endpoints.MapControllers();
+    
+#if USE_YARP
+    if (isDevelopment)
+        endpoints.MapReverseProxy();
+#endif
 });
 
 app.Run();

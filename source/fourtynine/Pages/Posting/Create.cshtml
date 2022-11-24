@@ -22,11 +22,11 @@
     text-gray-800
   "
 >
-  <form 
+  <form
     autocomplete="on"
     name="postingForm"
-    method="post"
   >
+    @Html.AntiForgeryToken()
     @Html.InputFor(m => m.Posting.Title)
     @Html.InputFor(m => m.Posting.Description)
     @Html.InputFor(m => m.Posting.ThumbnailUrl)

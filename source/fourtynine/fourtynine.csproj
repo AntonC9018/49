@@ -5,14 +5,17 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
+  
   <PropertyGroup>
     <PRODUCTION Condition=" '$(PRODUCTION)' == '' ">false</PRODUCTION>
     <DefineConstants Condition=" '$(PRODUCTION)' == 'true' ">PRODUCTION</DefineConstants>
     <DefineConstants Condition=" '$(PRODUCTION)' != 'true' ">DEVELOPMENT</DefineConstants>
+    
+    <USE_YARP Condition=" '$(USE_YARP)' == '' ">false</USE_YARP>
+    <DefineConstants Condition=" '$(USE_YARP)' == 'true' ">$(DefineConstants);USE_YARP</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AspNetCore.Proxy" Version="4.4.0" />
     <PackageReference Include="AutoMapper" Version="12.0.0" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="6.0.11" />
@@ -20,6 +23,9 @@
     <PackageReference Include="Microsoft.FeatureManagement.AspNetCore" Version="3.0.0-preview" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     <PackageReference Include="LinqKit" Version="1.2.3" />
+    
+    <PackageReference Condition=" '$(USE_YARP)' != 'true' " Include="AspNetCore.Proxy" Version="4.4.0" />
+    <PackageReference Condition=" '$(USE_YARP)' == 'true' " Include="Yarp.ReverseProxy" Version="1.1.1" />
 
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.11">
       <PrivateAssets>all</PrivateAssets>
@@ -27,8 +33,6 @@
     </PackageReference>
 
     <PackageReference Include="Unchase.Swashbuckle.AspNetCore.Extensions" Version="2.6.12" />
-<!--    Maybe find out how to make this work with EF Core some time later? -->
-<!--    <PackageReference Include="AutoMapper" Version="12.0.0" />-->
   </ItemGroup>
 
   <ItemGroup>
@@ -36,18 +40,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="Postings\CreatePostingPageModel.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <AdditionalFiles Include="Pages\Index.cshtml" />
     <AdditionalFiles Include="Pages\Privacy.cshtml" />
     <AdditionalFiles Include="Pages\Shared\Partials\CheckBox.cshtml" />
   </ItemGroup>
-
-  <ItemGroup>
-    <_ContentIncludedByDefault Remove="Pages\Shared\FormPartials\FormInput.cshtml" />
-  </ItemGroup>
-  
 
 </Project>

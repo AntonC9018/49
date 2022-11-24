@@ -52,3 +52,10 @@ Since we've got NSwag, TypeScript has information on the types through the gener
 I'm now thinking it's better to validate through the swagger spec.
 Either checks should be disabled in production though.
 After some thought and experimentation, I went ahead and did a hack to generate the reflection info that I need for validation using NSwag in the client generation Nuke task. The reflection did not work out, see [my issue](https://github.com/Hookyns/tst-reflect/issues/83).
+
+- I've had a lot of trouble trying to make the razor pages code DRY.
+I thought tag helpers would be good for this, but the thing is, while they can render partials, those partials can not pass `ModelExpression`'s as parameters to other tag helpers.
+See e.g. [this stackoverflow answer](https://stackoverflow.com/a/55474543/9731532), which I don't understand in the slightest.
+It involves some really tricky magic and introduces a lot of boilerplate just to juggle the contexts.
+So I decided to ditch the tag helpers and use html helpers, specifically editor/display templates. These just use html helpers to achieve the same effect. Rendering these inside partials still involves some magical context juggling, but it's far less annoying. The documentation is sparse too.
+See [this blog](https://cpratt.co/displaytemplates-and-editortemplates-for-fun-and-profit/) for some enlightenment on the topic.
