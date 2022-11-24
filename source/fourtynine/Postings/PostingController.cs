@@ -27,13 +27,15 @@ public class PostingApiService
 }
 public static class PostingApiServiceExtensions
 {
-    public static Task<PostingGetDto_General?> GetGeneral(
+    public static async Task<PostingGetDto_General?> GetGeneral(
         this PostingApiService api, long id)
     {
-        return api.DbContext.Postings
+        var dto = await api.DbContext.Postings
             .Where(p => p.Id == id)
             .ProjectTo<PostingGetDto_General>(api.Mapper)
             .FirstOrDefaultAsync();
+        dto?.InitializeSlug();
+        return dto;
     }
     
     public static IQueryable<T> ProjectTo<T>(this IQueryable query, IMapper mapper)
@@ -42,13 +44,15 @@ public static class PostingApiServiceExtensions
     }
     
 
-    public static Task<PostingGetDto_Detailed?> GetDetailed(
+    public static async Task<PostingGetDto_Detailed?> GetDetailed(
         this PostingApiService api, long id)
     {
-        return api.DbContext.Postings
+        var dto = await api.DbContext.Postings
             .Where(p => p.Id == id)
             .ProjectTo<PostingGetDto_Detailed>(api.Mapper)
             .FirstOrDefaultAsync();
+        dto?.General.InitializeSlug();
+        return dto;
     }
     
     public static async Task<Posting> Create(
@@ -71,16 +75,26 @@ public static class PostingApiServiceExtensions
         // if (query.Blah)
         //      postings = postings.Where(Blah);
 
-        return await postings
+        var list = await postings
             .ProjectTo<PostingGetDto_General>(api.Mapper)
             .ToListAsync();
+        
+        foreach (var dto in list)
+            dto.InitializeSlug();
+
+        return list;
+    }
+    
+    public static void InitializeSlug(this PostingGetDto_General dto)
+    {
+        dto.Slug = dto.Title.ToLower().Replace(' ', '-');
     }
 
-    public static string GetSlug(this IPostingIdentification posting)
+    public static string GetSlug(this PostingGetDto_General dto)
     {
-        // TODO: slugify the title
-        string slug = posting.Title;
-        return slug;
+        if (dto.Slug is null)
+            InitializeSlug(dto);
+        return dto.Slug!;
     }
 }
 
@@ -135,10 +149,10 @@ public class PostingController : Controller
         _logger.LogInformation("Creating posting {title}", postingDto.Title);
         
         var posting = await _api.Create(postingDto);
-        return CreatedAtAction(
-            nameof(GetDetailed),
-            new { id = posting.Id }, 
-            _api.Mapper.Map<PostingGetDto_Detailed>(posting));
+        var dto = _api.Mapper.Map<PostingGetDto_Detailed>(posting);
+        dto.General.InitializeSlug();
+        
+        return CreatedAtAction(nameof(GetDetailed), new { id = posting.Id }, dto);
     }
     
 }

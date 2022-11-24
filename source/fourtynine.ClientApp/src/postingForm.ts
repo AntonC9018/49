@@ -1,6 +1,6 @@
 ﻿import {
-    ApiPropertyTable,
-    PostingCreate,
+    ApiPropertyTable, Client,
+    PostingCreate, ProblemDetails,
 } from "./api-client";
 
 export {}
@@ -10,9 +10,26 @@ initializePostingForm();
 function initializePostingForm()
 {
     const form = document.querySelector(`form[name="postingForm"]`) as HTMLFormElement;
-    validateForm(form, "PostingCreate");
+    validateForm(form, "PostingCreate", "Posting.");
+    
+    // It would've been way easier to do with a framework.
+    form.querySelectorAll(`div[enable-when]`).forEach(div =>
+    {
+        const togglerId = div.getAttribute("enable-when")!;
+        const toggler = document.getElementById(togglerId) as HTMLInputElement;
+        if (!toggler)
+            throw new Error(`Toggler with id '${togglerId}' not found.`);
 
-    form.addEventListener("submit", function (event)
+        function toggle()
+        {
+            div!.classList.toggle("hidden", !toggler.checked);
+        }
+        toggler.addEventListener("click", toggle);
+        toggle();
+    });
+    
+    const client = new Client();
+    form.addEventListener("submit", async function (event)
     {
         event.preventDefault();
         const form = event.target as HTMLFormElement;
@@ -20,14 +37,62 @@ function initializePostingForm()
 
         // @ts-ignore
         const dto = mapShallowObject(formData) as PostingCreate;
-        
-        debugger;
+        try
+        {
+            const response = await client.postingPOST(dto);
+            window.history.pushState({}, "", 
+                `/postings/${response.General.Id}/${response.General.Slug}`);            
+        }
+        catch (e: any)
+        {
+            // if (!ApiException.isApiException(e))
+            //     throw e;
+            console.log(e);
+            
+            // Temporary thing.
+            function toast(str: string)
+            {
+                const toast = document.createElement("div");
+                toast.classList.add("toast");
+                toast.innerText = str;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 5000);
+                
+                console.error(str);
+            }
+
+            const serverException = e as ProblemDetails;
+            if (serverException && serverException.errors)
+            {
+                console.error(serverException.title);
+                for (let [field, error] of Object.entries(serverException.errors))
+                    console.error(`${field}: ${error}`);
+            }
+
+            switch (e.status)
+            {
+                case 400:
+                {
+                    toast("Bad Request 400:" + e.result);
+                    break;
+                }
+                case 401:
+                    toast("Unauthorized 401:" + e.response);
+                    break;
+                case 403:
+                    toast("Forbidden 403:" + e.response);
+                    break;
+                case 404:
+                    toast("Not Found 404:" + e.response);
+                    break;
+            }
+        }
     });
 }
 
 type ApiSchemaName = keyof typeof ApiPropertyTable;
 
-function validateForm(form: HTMLFormElement, schemaName: ApiSchemaName)
+function validateForm(form: HTMLFormElement, schemaName: ApiSchemaName, namePrefix = "")
 {
     console.assert(form != null);
 
@@ -36,13 +101,16 @@ function validateForm(form: HTMLFormElement, schemaName: ApiSchemaName)
     for (let i = 0; i < form.elements.length; i++)
     {
         const element = form.elements[i];
-        const name = element.getAttribute('name');
+        let name = element.getAttribute('name');
         if (!name)
             continue;
-        
         // I don't know how to handle this yet.
         if (name == "__RequestVerificationToken")
             continue;
+        if (!name.startsWith(namePrefix))
+            continue;
+        
+        name = name.substring(namePrefix.length);
         
         if (dtoKeys.has(name))
             foundKeys.add(name);

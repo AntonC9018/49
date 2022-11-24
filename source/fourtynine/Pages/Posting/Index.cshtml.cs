@@ -33,7 +33,7 @@ public class PostingIndexPageModel : PageModel
             return RedirectToPage("/Error");
         Posting = posting;
 
-        var slug = posting.GetSlug();
+        var slug = posting.General.Slug;
         NewUrl = _linkGenerator.GetPathByPage(HttpContext,
             values: new { postingId = PostingId, slug })!;
 

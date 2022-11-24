@@ -7,14 +7,15 @@ namespace fourtynine.Postings;
 
 public sealed class PostingGetDto_General : IPostingIdentification
 {
-    public long Id { get; set; }
-    public string Title { get; set; }
-    public string Description { get; set; }
-    public string ThumbnailUrl { get; set; }
-    public DateTime DatePosted { get; set; }
- 
-    // TODO
-    // public string Slug { get; set; }
+    [Required] public long Id { get; set; }
+    [Required] public string Title { get; set; }
+    [Required] public string Description { get; set; }
+    [Required] public string ThumbnailUrl { get; set; }
+    [Required] public DateTime DatePosted { get; set; }
+    
+    // NOTE: has to be initialized manually if it's needed.
+    // TODO: Maybe make the computed properties lazy?
+    [Required] public string? Slug { get; set; }
 }
 
 public sealed class PostingDetailsDto
@@ -58,20 +59,20 @@ public sealed class LocationPostingDetailsDto : ILocationPostingDetails
 
 public sealed class PostingGetDto_Detailed : IPostingIdentification
 {
-    public PostingGetDto_General General { get; set; }
-    public List<string> PictureUrls { get; set; }
-    public PostingAuthorGetDto Author { get; set; }
-    public PostingDetailsDto Details { get; set; }
+    [Required] public PostingGetDto_General General { get; set; }
+    [Required] public List<string> PictureUrls { get; set; }
+    [Required] public PostingAuthorGetDto Author { get; set; }
+    [Required] public PostingDetailsDto Details { get; set; }
 
-    public long Id => General.Id;
-    public string Title => General.Title;
+    long IPostingIdentification.Id => General.Id;
+    string IPostingIdentification.Title => General.Title;
 }
 
 public sealed class PostingAuthorGetDto
 {
-    public int Id { get; set; }
-    public string Name { get; set; }
-    public string Email { get; set; }
+    [Required] public int Id { get; set; }
+    [Required] public string Name { get; set; }
+    [Required] public string Email { get; set; }
 }
 
 public sealed class PostingCreateDto

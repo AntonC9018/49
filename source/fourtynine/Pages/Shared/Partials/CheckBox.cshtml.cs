@@ -1,40 +1,38 @@
-﻿using System.Linq.Expressions;
-using fourtynine.Razor;
-using JetBrains.Annotations;
+﻿using fourtynine.Razor;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace fourtynine.Partials;
 
-public record FormCheckBoxModel(
+public record CheckBoxModel(
     string Label,
     string Expression)
 {
     public string Id => Expression;
 }
 
-[HtmlTargetElement("FormCheckBox")]
-public class FormCheckBoxTagHelper : PartialRazorTagHelperBase<FormCheckBoxModel>
+[HtmlTargetElement("CheckBox")]
+public class CheckBoxTagHelper : PartialRazorTagHelperBase<CheckBoxModel>
 {
-    public FormCheckBoxTagHelper(IHtmlHelper htmlHelper) : base(htmlHelper)
+    public CheckBoxTagHelper(IHtmlHelper htmlHelper) : base(htmlHelper)
     {
     }
     
     public string? Label { get; set; }
     public ModelExpression? For { get; set; }
 
-    protected override FormCheckBoxModel CreateModel()
+    protected override CheckBoxModel CreateModel()
     {
         if (For is null)
             throw new ArgumentNullException(nameof(For));
         
         Label ??= For.Name[(For.Name.LastIndexOf('.') + 1) ..];
         
-        return new FormCheckBoxModel(
+        return new CheckBoxModel(
             Label: Label,
             Expression: For.Name);
     }
     
-    protected override string PartialPath => "~/Pages/Shared/FormPartials/FormCheckBox.cshtml";
+    protected override string PartialPath => "~/Pages/Shared/Partials/CheckBox.cshtml";
 }

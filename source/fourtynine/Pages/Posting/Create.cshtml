@@ -7,6 +7,8 @@
     ViewData["Title"] = "Create Posting";
 }
 
+<ImportFile path="src/postingForm.ts"></ImportFile>
+
 @* https://tailwind-elements.com/docs/standard/forms/form-templates/ *@
 <div 
   class="
@@ -29,10 +31,10 @@
     @Html.InputFor(m => m.Posting.Description)
     @Html.InputFor(m => m.Posting.ThumbnailUrl)
 
-    <FormCheckBox
+    <CheckBox
       for="Posting.Details.Pricing"
       label="Price?">
-    </FormCheckBox>
+    </CheckBox>
     
     @* This will require a bunch of custom javascript *@
     <div enable-when="Posting.Details.Pricing">
@@ -40,10 +42,10 @@
       @Html.EditorFor(m => m.Posting.Details.Pricing)
     </div>
     
-    <FormCheckBox
+    <CheckBox
       for="Posting.Details.Location"
       label="Location?">
-    </FormCheckBox>
+    </CheckBox>
     
     @* This will require a bunch of custom javascript *@
     <div enable-when="Posting.Details.Location">
@@ -51,10 +53,10 @@
       @Html.EditorFor(m => m.Posting.Details.Location)
     </div>
     
-    <FormCheckBox
+    <CheckBox
       for="Posting.Details.RealEstate"
       label="Real Estate?">
-    </FormCheckBox>
+    </CheckBox>
     
     @* This will require a bunch of custom javascript *@
     <div enable-when="Posting.Details.RealEstate">
@@ -62,10 +64,10 @@
       @Html.EditorFor(m => m.Posting.Details.RealEstate)
     </div>
     
-    <FormCheckBox
+    <CheckBox
       for="Posting.Details.Vehicle"
       label="Vehicle?">
-    </FormCheckBox>
+    </CheckBox>
     
     <div enable-when="Posting.Details.Vehicle">
       <h2 class="text-lg text-center">Vehicle</h2>

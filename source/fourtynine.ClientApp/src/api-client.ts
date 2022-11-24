@@ -374,9 +374,9 @@ export interface ILocationPostingDetails {
 }
 
 export class PostingAuthorGet implements IPostingAuthorGet {
-    Id?: number;
-    Name?: string | undefined;
-    Email?: string | undefined;
+    Id!: number;
+    Name!: string;
+    Email!: string;
 
     constructor(data?: IPostingAuthorGet) {
         if (data) {
@@ -412,9 +412,9 @@ export class PostingAuthorGet implements IPostingAuthorGet {
 }
 
 export interface IPostingAuthorGet {
-    Id?: number;
-    Name?: string | undefined;
-    Email?: string | undefined;
+    Id: number;
+    Name: string;
+    Email: string;
 }
 
 export class PostingCreate implements IPostingCreate {
@@ -517,10 +517,10 @@ export interface IPostingDetails {
 }
 
 export class PostingGetDetailed implements IPostingGetDetailed {
-    General?: PostingGetGeneral;
-    PictureUrls?: string[] | undefined;
-    Author?: PostingAuthorGet;
-    Details?: PostingDetails;
+    General!: PostingGetGeneral;
+    PictureUrls!: string[];
+    Author!: PostingAuthorGet;
+    Details!: PostingDetails;
 
     constructor(data?: IPostingGetDetailed) {
         if (data) {
@@ -529,18 +529,24 @@ export class PostingGetDetailed implements IPostingGetDetailed {
                     (<any>this)[property] = (<any>data)[property];
             }
         }
+        if (!data) {
+            this.General = new PostingGetGeneral();
+            this.PictureUrls = [];
+            this.Author = new PostingAuthorGet();
+            this.Details = new PostingDetails();
+        }
     }
 
     init(_data?: any) {
         if (_data) {
-            this.General = _data["General"] ? PostingGetGeneral.fromJS(_data["General"]) : <any>undefined;
+            this.General = _data["General"] ? PostingGetGeneral.fromJS(_data["General"]) : new PostingGetGeneral();
             if (Array.isArray(_data["PictureUrls"])) {
                 this.PictureUrls = [] as any;
                 for (let item of _data["PictureUrls"])
                     this.PictureUrls!.push(item);
             }
-            this.Author = _data["Author"] ? PostingAuthorGet.fromJS(_data["Author"]) : <any>undefined;
-            this.Details = _data["Details"] ? PostingDetails.fromJS(_data["Details"]) : <any>undefined;
+            this.Author = _data["Author"] ? PostingAuthorGet.fromJS(_data["Author"]) : new PostingAuthorGet();
+            this.Details = _data["Details"] ? PostingDetails.fromJS(_data["Details"]) : new PostingDetails();
         }
     }
 
@@ -566,18 +572,19 @@ export class PostingGetDetailed implements IPostingGetDetailed {
 }
 
 export interface IPostingGetDetailed {
-    General?: PostingGetGeneral;
-    PictureUrls?: string[] | undefined;
-    Author?: PostingAuthorGet;
-    Details?: PostingDetails;
+    General: PostingGetGeneral;
+    PictureUrls: string[];
+    Author: PostingAuthorGet;
+    Details: PostingDetails;
 }
 
 export class PostingGetGeneral implements IPostingGetGeneral {
-    Id?: number;
-    Title?: string | undefined;
-    Description?: string | undefined;
-    ThumbnailUrl?: string | undefined;
-    DatePosted?: Date;
+    Id!: number;
+    Title!: string;
+    Description!: string;
+    ThumbnailUrl!: string;
+    DatePosted!: Date;
+    Slug!: string;
 
     constructor(data?: IPostingGetGeneral) {
         if (data) {
@@ -595,6 +602,7 @@ export class PostingGetGeneral implements IPostingGetGeneral {
             this.Description = _data["Description"];
             this.ThumbnailUrl = _data["ThumbnailUrl"];
             this.DatePosted = _data["DatePosted"] ? new Date(_data["DatePosted"].toString()) : <any>undefined;
+            this.Slug = _data["Slug"];
         }
     }
 
@@ -612,16 +620,18 @@ export class PostingGetGeneral implements IPostingGetGeneral {
         data["Description"] = this.Description;
         data["ThumbnailUrl"] = this.ThumbnailUrl;
         data["DatePosted"] = this.DatePosted ? this.DatePosted.toISOString() : <any>undefined;
+        data["Slug"] = this.Slug;
         return data;
     }
 }
 
 export interface IPostingGetGeneral {
-    Id?: number;
-    Title?: string | undefined;
-    Description?: string | undefined;
-    ThumbnailUrl?: string | undefined;
-    DatePosted?: Date;
+    Id: number;
+    Title: string;
+    Description: string;
+    ThumbnailUrl: string;
+    DatePosted: Date;
+    Slug: string;
 }
 
 export class PricingPostingDetails implements IPricingPostingDetails {
@@ -916,6 +926,7 @@ export const ApiPropertyTable = {
         { name: "Description", schemaTypeName: null },
         { name: "ThumbnailUrl", schemaTypeName: null },
         { name: "DatePosted", schemaTypeName: null },
+        { name: "Slug", schemaTypeName: null },
     ],
     PricingPostingDetails: [
         { name: "BargainKinds", schemaTypeName: null },

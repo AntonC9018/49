@@ -1,8 +1,8 @@
 ﻿@using fourtynine.EditorTemplates
 
 @{
-    var additionalData = ViewData.GetDropDownData();
-    var label = additionalData.Label ?? ViewData.GetLabel();
+    var data = ViewData.GetDropDownData();
+    var label = data.Label ?? ViewData.GetLabel();
 }
 
 <div class="form-group mb-6">
@@ -17,7 +17,7 @@
     @* If we want to style it in a custom way, we have to do a div and list out the elements *@
     @* manually, + then a bunch of javascript would be needed too. *@
     @* This is also not dry, I've copy pasted the classes from String.cshtml, just changed the padding somewhat. *@
-    @Html.DropDownList("", additionalData.Items, null, new
+    @Html.DropDownList("", data.Items, null, new
     {
         @class = @"
             block

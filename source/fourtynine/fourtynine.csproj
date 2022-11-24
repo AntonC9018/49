@@ -42,6 +42,11 @@
   <ItemGroup>
     <AdditionalFiles Include="Pages\Index.cshtml" />
     <AdditionalFiles Include="Pages\Privacy.cshtml" />
+    <AdditionalFiles Include="Pages\Shared\Partials\CheckBox.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Pages\Shared\FormPartials\FormInput.cshtml" />
   </ItemGroup>
   
 
