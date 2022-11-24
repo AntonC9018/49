@@ -1,6 +1,7 @@
 ﻿@page
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @using fourtynine.Partials
+@using fourtynine.EditorTemplates
 @model fourtynine.Postings.CreatePostingPageModel
 @{
     ViewData["Title"] = "Create Posting";
@@ -24,28 +25,10 @@
     name="postingForm"
     method="post"
   >
-    @* TODO: *@
-    @* Autogenerate to an extent?  *@
-    @* There's too many things that are easy to miss. *@
-    
-    @Html.MakeEditor(m => m.Posting.Title)
-    <FormInput
-      for="Posting.Title"
-      input-type="@(FormInputType.Text)">
-    </FormInput>
-    
-    <FormInput
-      for="Posting.Description"
-      input-type="@(FormInputType.TextArea)">
-    </FormInput>
-    
-    @* TODO: allow dropping images *@
-    <FormInput
-      for="Posting.ThumbnailUrl"
-      label="Thumbnail"
-      input-type="@(FormInputType.Text)">
-    </FormInput>
-    
+    @Html.InputFor(m => m.Posting.Title)
+    @Html.InputFor(m => m.Posting.Description)
+    @Html.InputFor(m => m.Posting.ThumbnailUrl)
+
     <FormCheckBox
       for="Posting.Details.Pricing"
       label="Price?">
@@ -54,24 +37,7 @@
     @* This will require a bunch of custom javascript *@
     <div enable-when="Posting.Details.Pricing">
       <h2 class="text-lg text-center">Pricing</h2>
-      
-      @* TODO: Dropdowns *@
-      <FormInput
-        for="Posting.Details.Pricing!.BargainKinds"
-        label="Bargain Kind"
-        input-type="@(FormInputType.Dropdown)">
-      </FormInput>
-      
-      <FormInput
-        for="Posting.Details.Pricing!.Price"
-        input-type="@(FormInputType.Number)">
-      </FormInput>
-      
-      <FormInput
-        for="Posting.Details.Pricing!.PriceMax"
-        label="Maximum Price"
-        input-type="@(FormInputType.Number)">
-      </FormInput>
+      @Html.EditorFor(m => m.Posting.Details.Pricing)
     </div>
     
     <FormCheckBox
@@ -82,31 +48,7 @@
     @* This will require a bunch of custom javascript *@
     <div enable-when="Posting.Details.Location">
       <h2 class="text-lg text-center">Location</h2>
-      
-      <FormInput
-        for="Posting.Details.Location!.Country"
-        input-type="@(FormInputType.Text)">
-      </FormInput>
-      
-      <FormInput
-        for="Posting.Details.Location!.Address"
-        input-type="@(FormInputType.Text)">
-      </FormInput>
-      
-      <FormInput
-        for="Posting.Details.Location!.City"
-        input-type="@(FormInputType.Text)">
-      </FormInput>
-      
-      <FormInput
-        for="Posting.Details.Location!.Latitude"
-        input-type="@(FormInputType.Number)">
-      </FormInput>
-      
-      <FormInput
-        for="Posting.Details.Location!.Longitude"
-        input-type="@(FormInputType.Number)">
-      </FormInput>
+      @Html.EditorFor(m => m.Posting.Details.Location)
     </div>
     
     <FormCheckBox
@@ -117,29 +59,7 @@
     @* This will require a bunch of custom javascript *@
     <div enable-when="Posting.Details.RealEstate">
       <h2 class="text-lg text-center">Real Estate</h2>
-      
-      @* Requires passing expressions ... *@
-      @* TODO: *@
-      <FormInput
-        for="Posting.Details.RealEstate!.Kind"
-        input-type="@(FormInputType.Dropdown)">
-      </FormInput>
-
-      @* TODO: *@
-      <FormInput
-        for="Posting.Details.RealEstate!.SpacePurpose"
-        input-type="@(FormInputType.Dropdown)">
-      </FormInput>
-      
-      <FormInput
-        for="Posting.Details.RealEstate!.Rooms"
-        input-type="@(FormInputType.Number)">
-      </FormInput>
-      
-      <FormInput
-        for="Posting.Details.RealEstate!.Area"
-        input-type="@(FormInputType.Number)">
-      </FormInput>
+      @Html.EditorFor(m => m.Posting.Details.RealEstate)
     </div>
     
     <FormCheckBox
@@ -149,21 +69,7 @@
     
     <div enable-when="Posting.Details.Vehicle">
       <h2 class="text-lg text-center">Vehicle</h2>
-      
-      <FormInput
-        for="Posting.Details.Vehicle!.Year"
-        input-type="@(FormInputType.Number)">
-      </FormInput>
-
-      <FormInput
-        for="Posting.Details.Vehicle!.Model"
-        input-type="@(FormInputType.Text)">
-      </FormInput>
-      
-      <FormInput
-        for="Posting.Details.Vehicle!.Manufacturer"
-        input-type="@(FormInputType.Text)">
-      </FormInput>
+      @Html.EditorFor(m => m.Posting.Details.Vehicle)
     </div>
     
     <button

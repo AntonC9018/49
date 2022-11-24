@@ -1,0 +1,18 @@
+﻿@using fourtynine.EditorTemplates
+@using fourtynine.DataAccess
+@model fourtynine.Postings.PricingPostingDetailsDto
+
+@Html.DropDownFor(m => m.BargainKinds, new()
+{
+    Label = "Bargain Kind",
+    Items = new SelectListItem[]
+    {
+        // Don't allow combinations for now, even though the database allows it.
+        new("Buy", ((int) BargainKinds.Buy).ToString()),
+        new("Sell", ((int) BargainKinds.Sale).ToString()),
+        new("Rent", ((int) BargainKinds.Rent).ToString()),
+        new("Lease", ((int) BargainKinds.Lease).ToString()),
+    },
+})
+@Html.InputFor(m => m.Price)
+@Html.InputFor(m => m.PriceMax)

@@ -1,0 +1,42 @@
+﻿@using fourtynine.EditorTemplates
+
+@{
+    var additionalData = ViewData.GetDropDownData();
+    var label = additionalData.Label ?? ViewData.GetLabel();
+}
+
+<div class="form-group mb-6">
+    @Html.Label("", label, new
+    {
+        @class = @"
+            inline-block
+            mb-2
+            text-gray-700",
+    })
+    
+    @* If we want to style it in a custom way, we have to do a div and list out the elements *@
+    @* manually, + then a bunch of javascript would be needed too. *@
+    @* This is also not dry, I've copy pasted the classes from String.cshtml, just changed the padding somewhat. *@
+    @Html.DropDownList("", additionalData.Items, null, new
+    {
+        @class = @"
+            block
+            w-full
+            px-3
+            py-2
+            text-base
+            font-normal
+            text-gray-700
+            bg-white bg-clip-padding
+            border border-solid border-gray-300
+            rounded
+            transition
+            ease-in-out
+            m-0
+            focus:text-gray-700
+            focus:bg-white
+            focus:border-blue-600
+            focus:outline-none",
+    })
+</div>
+

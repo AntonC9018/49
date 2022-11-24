@@ -1,21 +1,20 @@
-﻿@using fourtynine.Partials
+﻿@using fourtynine.EditorTemplates
 
 @{
     var additionalData = ViewData.GetInputProperties();
-    var label = ViewData.GetLabel(additionalData);
-    var placeholder = additionalData.PlaceHolder ?? "Enter " + label;
+    var label = additionalData.Label ?? ViewData.GetLabel();
+    var placeholder = additionalData.PlaceHolder;
 }
 
 @* TODO: add validation *@
 <div class="form-group mb-6">
-    @Html.Label("", label,
-        new
-        {
-            @class = @"
-                inline-block
-                mb-2
-                text-gray-700",
-        })
+    @Html.Label("", label, new
+    {
+        @class = @"
+            inline-block
+            mb-2
+            text-gray-700",
+    })
     @{
         object inputHtmlAttributes = new
         {
@@ -42,12 +41,8 @@
         };
     }
     @Html.TextBox("", value: "", htmlAttributes: inputHtmlAttributes)
-    
-    @if (additionalData.AddValidation)
+    @Html.ValidationMessage("", new
     {
-        @Html.ValidationMessage("", new
-        {
-            @class = @"text-red-600",
-        })
-    }
+        @class = @"text-red-600",
+    })
 </div>

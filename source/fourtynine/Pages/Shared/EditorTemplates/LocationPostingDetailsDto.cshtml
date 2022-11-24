@@ -1,0 +1,15 @@
+﻿@using fourtynine.EditorTemplates
+@model fourtynine.Postings.LocationPostingDetailsDto
+
+@Html.InputFor(m => m.Country)
+@Html.InputFor(m => m.City)
+@Html.InputFor(m => m.Address)
+
+@* 
+    This should be a javascript picker.
+    I realize that html having to be abstracted like this + separated from javascript is not maintainable.
+    The client code will have to be separated from the html abstractions
+    and work with the processed html, which is a massive hassle.
+*@
+@Html.InputFor(m => m.Latitude)
+@Html.InputFor(m => m.Longitude)

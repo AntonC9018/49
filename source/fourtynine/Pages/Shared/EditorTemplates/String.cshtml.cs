@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
-namespace fourtynine.Partials;
+namespace fourtynine.EditorTemplates;
 
 public interface IInputProperties
 {
@@ -11,7 +11,6 @@ public interface IInputProperties
     string? PlaceHolder { get; }
     string? Label { get; }
     string? InputType { get; }
-    bool AddValidation { get; } 
 }
 
 public class InputProperties : IInputProperties
@@ -19,64 +18,59 @@ public class InputProperties : IInputProperties
     public string? PlaceHolder { get; set; }
     public string? Label { get; set; }
     public string? InputType { get; set; } = "text";
-    public bool AddValidation { get; set; }
 }
 
 public static class Extensions
 {
     public static IInputProperties GetInputProperties(this ViewDataDictionary view)
     {
-        return view.GetAdditionalData<IInputProperties>() ?? IInputProperties.Default;
+        return view[nameof(IInputProperties)] as IInputProperties ?? IInputProperties.Default;
     }
     
-    public static T? GetAdditionalData<T>(this ViewDataDictionary view)
-        where T : class
+    public static string GetLabel(this ViewDataDictionary view)
     {
-        return view["AdditionalData"] as T;
-    }
-    
-    public static T GetRequiredAdditionalData<T>(this ViewDataDictionary view)
-        where T : class
-    {
-        return view.GetAdditionalData<T>()
-            ?? throw new InvalidOperationException("Additional data not found");
-    }
-    
-    public static string GetLabel(this ViewDataDictionary view, IInputProperties properties)
-    {
-        string label;
-        if (properties.Label != null)
-        {
-            label = properties.Label;
-        }
-        else
-        {
-            var t = view.TemplateInfo.FormattedModelValue.ToString();
-            if (string.IsNullOrEmpty(t))
-                t = view.ModelExplorer.Metadata.PropertyName;
-            label = t ?? "Label";
-        }
-        return label;
+        var t = view.TemplateInfo.FormattedModelValue.ToString();
+        if (string.IsNullOrEmpty(t))
+            t = view.ModelExplorer.Metadata.PropertyName;
+        return t ?? "Label";
     }
 
-    public static IHtmlContent _MakeEditor<TModel, TResult, TAdditionalData>(
+    public static IHtmlContent InputFor<TModel, TResult>(
         this IHtmlHelper<TModel> htmlHelper,
         Expression<Func<TModel, TResult>> expression,
-        TAdditionalData additionalData)
-        where TAdditionalData : class
+        InputProperties? inputProperties = null)
     {
-        return htmlHelper.EditorFor(expression,
-            additionalViewData: new { AdditionalData = additionalData });
+        if (IsNumericType(typeof(TResult)))
+        {
+            inputProperties ??= new InputProperties();
+            inputProperties.InputType = "number";
+        }
+        Dictionary<string, object?> additionalData = new()
+        {
+            { nameof(IInputProperties), inputProperties }
+        };
+        return htmlHelper.EditorFor(expression, templateName: "String", additionalData);
     }
     
-    public static IHtmlContent MakeEditor<TModel>(
-        this IHtmlHelper<TModel> htmlHelper,
-        Expression<Func<TModel, string>> expression,
-        InputProperties? additionalData = null)
+    private static bool IsNumericType(this Type type)
     {
-        if (additionalData is null)
-            return htmlHelper.EditorFor(expression);
-        else
-            return htmlHelper._MakeEditor(expression, additionalData);
+        type = Nullable.GetUnderlyingType(type) ?? type;
+        switch (Type.GetTypeCode(type))
+        {
+            case TypeCode.Byte:
+            case TypeCode.SByte:
+            case TypeCode.UInt16:
+            case TypeCode.UInt32:
+            case TypeCode.UInt64:
+            case TypeCode.Int16:
+            case TypeCode.Int32:
+            case TypeCode.Int64:
+            case TypeCode.Decimal:
+            case TypeCode.Double:
+            case TypeCode.Single:
+                return true;
+            default:
+                return type.IsEnum;
+        }
     }
 }
