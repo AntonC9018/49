@@ -53,6 +53,17 @@ function initializePostingForm()
         const formData = new FormData(form);
         const dto = mapShallowObject(formData) as PostingCreate;
         
+        // Set unchecked details to null.
+        for (const prop of ApiPropertyTable.PostingDetails)
+        {
+            const key = "Posting.Details." + prop.name;
+            const toggler = document.getElementById(key) as HTMLInputElement;
+            if (toggler.checked)
+                continue;
+            
+            (<any> dto.Details)[prop.name] = null;
+        }
+        
         try
         {
             const response = await client.postingPOST(dto);

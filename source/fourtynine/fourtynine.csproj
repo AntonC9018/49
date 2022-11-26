@@ -8,8 +8,8 @@
   
   <PropertyGroup>
     <PRODUCTION Condition=" '$(PRODUCTION)' == '' ">false</PRODUCTION>
-    <DefineConstants Condition=" '$(PRODUCTION)' == 'true' ">PRODUCTION</DefineConstants>
-    <DefineConstants Condition=" '$(PRODUCTION)' != 'true' ">DEVELOPMENT</DefineConstants>
+    <DefineConstants Condition=" '$(PRODUCTION)' == 'true' ">$(DefineConstants);PRODUCTION</DefineConstants>
+    <DefineConstants Condition=" '$(PRODUCTION)' != 'true' ">$(DefineConstants);DEVELOPMENT</DefineConstants>
     
     <USE_YARP Condition=" '$(USE_YARP)' == '' ">false</USE_YARP>
     <DefineConstants Condition=" '$(USE_YARP)' == 'true' ">$(DefineConstants);USE_YARP</DefineConstants>

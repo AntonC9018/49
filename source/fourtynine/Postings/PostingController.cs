@@ -68,6 +68,7 @@ public static class PostingApiServiceExtensions
         this PostingApiService api, [FromQuery] SearchQuery query)
     {
         var postings = api.DbContext.Postings
+            .OrderBy(p => p.Id)
             .Where(p => p.Id >= query.StartId)
             .Take(query.Count);
         

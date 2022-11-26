@@ -1,6 +1,7 @@
 #if !USE_YARP
 using AspNetCore.Proxy;
 #endif
+using System.Net;
 using fourtynine;
 using fourtynine.DataAccess;
 using fourtynine.Development;
@@ -111,6 +112,22 @@ else
 
 builder.Services.AddScoped<PostingApiService>();
 
+builder.Services.AddAuthentication(defaultScheme: ProjectConfiguration.AuthCookieName)
+    .AddCookie(ProjectConfiguration.AuthCookieName, options =>
+    {
+        options.Cookie.Name = ProjectConfiguration.AuthCookieName;
+        
+        // Only redirect get requests.
+        options.Events.OnRedirectToLogin = context =>
+        {
+            if (context.HttpContext.Request.Method != "GET")
+                context.Response.StatusCode = (int) HttpStatusCode.Unauthorized;
+            else
+                context.Response.Redirect(context.RedirectUri);
+            return Task.CompletedTask;
+        };
+    });
+
 var app = builder.Build();
 
 if (isDevelopment)
@@ -137,9 +154,10 @@ if (!isDevelopment)
 }
 
 app.UseHttpsRedirection();
-app.UseAuthentication();
 app.UseWebSockets();
 app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
 
 if (isDevelopment)
 {

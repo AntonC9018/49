@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace fourtynine;
 
@@ -29,5 +30,13 @@ public class StuffController : Controller
                 nameof(StuffController.GetStuff),
                 nameof(StuffController).ControllerName())
         });
+    }
+    
+    [HttpPost]
+    [Authorize]
+    public IActionResult PostStuff()
+    {
+        _logger.LogInformation("Restricted resource");
+        return Ok("Restricted resource");
     }
 }

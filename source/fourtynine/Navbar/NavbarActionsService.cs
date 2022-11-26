@@ -71,12 +71,16 @@ public interface INavbarActionsService
 {
     IEnumerable<INavbarAction> NavbarActions { get; }
     INavbarAction HomeAction { get; }
+    INavbarAction Login { get; }
+    INavbarAction Logout { get; }
 }
 
 public class NavbarActionsService : INavbarActionsService
 {
     public IEnumerable<INavbarAction> NavbarActions => _navbarActions;
     public INavbarAction HomeAction { get; }
+    public INavbarAction Login { get; }
+    public INavbarAction Logout { get; }
     private readonly INavbarAction[] _navbarActions; 
     
     public NavbarActionsService(LinkGenerator linkGenerator)
@@ -95,10 +99,20 @@ public class NavbarActionsService : INavbarActionsService
             linkGenerator,
             page: "/Privacy",
             "Privacy");
+        
+        Login = NavbarPageAction.Create(
+            linkGenerator,
+            page: "/Account/Login",
+            "Login");
+        
+        Logout = NavbarPageAction.Create(
+            linkGenerator,
+            page: "/Account/Logout",
+            "Logout");
+        
 
-        _navbarActions = new[]
+        _navbarActions = new INavbarAction[]
         {
-            HomeAction,
             create,
             privacy,
         };
