@@ -1,9 +1,30 @@
-﻿namespace fourtynine.DataAccess;
+﻿using System;
+
+namespace fourtynine.DataAccess;
 
 public interface IPostingIdentification
 {
     long Id { get; }
     string Title { get; }
+}
+
+public enum PostingKind
+{
+    [TagForType(typeof(RealEstatePostingDetails))]
+    RealEstate,
+
+    [TagForType(typeof(VehiclePostingDetails))]
+    Vehicle,
+}
+
+public sealed class TagForTypeAttribute : Attribute
+{
+    public TagForTypeAttribute(Type type)
+    {
+        Type = type;
+    }
+
+    public Type Type { get; set; }
 }
 
 public readonly record struct PriceRange(decimal Min, decimal Max);
@@ -13,6 +34,27 @@ public interface IPricingPostingDetails
     BargainKinds BargainKinds { get; set; }
     decimal? Price { get; set; }
     decimal? PriceMax { get; set; }
+}
+
+[Flags]
+public enum BargainKinds
+{
+    Offer = 1 << 0,
+    Request = 1 << 1,
+    Permanent = 1 << 2,
+    Temporary = 1 << 3,
+    
+    Sell = Offer | Permanent,
+    Rent = Offer | Temporary,
+    
+    Buy = Request | Permanent,
+    Lease = Request | Temporary,
+    
+    // In these cases the price is probably not going to be set.
+    SaleOrRent = Sell | Rent,
+    BuyOrLease = Buy | Lease,
+    
+    All = Offer | Request | Permanent | Temporary,
 }
 
 public static class PricingPostingDetailsExtensions

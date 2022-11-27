@@ -42,6 +42,12 @@ public sealed class Posting : IPostingIdentification
     // These types being owned makes the storage TBH essentially, all denormalized, with nulls.
     public PricingPostingDetails? Pricing { get; set; }
     public LocationPostingDetails? Location { get; set; }
+    
+    
+    // The things below always act like a discriminated union,
+    // only one of the can be not null.
+    // The correctness of Kind is enforced from the outside.
+    public PostingKind Kind { get; set; }
     public RealEstatePostingDetails? RealEstate { get; set; }
     public VehiclePostingDetails? Vehicle { get; set; }
     
@@ -61,25 +67,6 @@ public sealed class Picture
     public string Url { get; set; }
     public long PostingId { get; set; }
     public Posting Posting { get; set; }
-}
-
-[Flags]
-public enum BargainKinds
-{
-    Offer = 1 << 0,
-    Request = 1 << 1,
-    Permanent = 1 << 2,
-    Temporary = 1 << 3,
-    
-    Sale = Offer | Permanent,
-    Rent = Offer | Temporary,
-    
-    Buy = Request | Permanent,
-    Lease = Request | Temporary,
-    
-    // In these cases the price is probably not going to be set.
-    SaleOrRent = Sale | Rent,
-    BuyOrLease = Buy | Lease,
 }
 
 [Owned]

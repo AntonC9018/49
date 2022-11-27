@@ -1,12 +1,13 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using FluentValidation;
 using fourtynine.DataAccess;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace fourtynine.Postings;
 
-public class SearchQuery
+public sealed class SearchQuery
 {
     public int Count { get; set; } = 10;
     public long StartId { get; set; } = 0;
@@ -14,7 +15,7 @@ public class SearchQuery
 
 // The idea is that this thing will have a bunch more properties
 // needed for the posting operations, like the mapper, validator, etc.
-public class PostingApiService
+public sealed class PostingApiService
 {
     public PostingsDbContext DbContext { get; }
     public IMapper Mapper { get; }
@@ -145,9 +146,15 @@ public class PostingController : Controller
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<PostingGetDto_Detailed>> Create(PostingCreateDto postingDto)
+    public async Task<ActionResult<PostingGetDto_Detailed>> Create(
+        PostingCreateDto postingDto, 
+        [FromServices] IValidator<PostingCreateDto> validator)
     {
         _logger.LogInformation("Creating posting {title}", postingDto.Title);
+
+        var validationResult = await validator.ValidateAsync(postingDto);
+        if (!validationResult.IsValid)
+            return BadRequest(validationResult.Errors);
         
         var posting = await _api.Create(postingDto);
         var dto = _api.Mapper.Map<PostingGetDto_Detailed>(posting);

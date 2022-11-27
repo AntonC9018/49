@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Linq.Expressions;
+using FluentValidation;
 using fourtynine.DataAccess;
 
 namespace fourtynine.Postings;
@@ -21,23 +23,59 @@ public sealed class PostingGetDto_General : IPostingIdentification
 public sealed class PostingDetailsDto
 {
     public PricingPostingDetailsDto? Pricing { get; set; } 
-    public VehiclePostingDetailsDto? Vehicle { get; set; } 
+    public LocationPostingDetailsDto? Location { get; set; }
+    
+    public PostingKind Kind { get; set; }
     public RealEstatePostingDetailsDto? RealEstate { get; set; } 
-    public LocationPostingDetailsDto? Location { get; set; } 
+    public VehiclePostingDetailsDto? Vehicle { get; set; } 
 }
 
-public class PricingPostingDetailsDto : IPricingPostingDetails
+public sealed class PricingPostingDetailsDto : IPricingPostingDetails
 {
     [Required] public BargainKinds BargainKinds { get; set; }
     public decimal? Price { get; set; }
     public decimal? PriceMax { get; set; }
 }
 
+public sealed class PricingPostingDetailsDtoValidator : AbstractValidator<PricingPostingDetailsDto>
+{
+    public PricingPostingDetailsDtoValidator()
+    {
+        RuleFor(x => x.BargainKinds)
+            .Must(x => ((x & BargainKinds.Offer) != 0) != ((x & BargainKinds.Request) != 0))
+            .WithMessage("No buying and selling at the same time.");
+        
+        RuleFor(x => x.BargainKinds)
+            .Must(x => (x & (BargainKinds.Offer | BargainKinds.Request)) != 0)
+            .WithMessage("Either offer or request is required.");
+        
+        RuleFor(x => x.BargainKinds)
+            .Must(x => x < BargainKinds.All);
+        
+        RuleFor(x => x.Price)
+            .NotNull().When(x => x.PriceMax is not null);
+    }
+}
+
+
 public sealed class VehiclePostingDetailsDto : IVehiclePostingDetails
 {
     [Required] public int Year { get; set; }
     [Required] public string Manufacturer { get; set; }
     [Required] public string Model { get; set; }
+}
+
+public sealed class VehiclePostingDetailsDtoValidator : AbstractValidator<VehiclePostingDetailsDto>
+{
+    public VehiclePostingDetailsDtoValidator()
+    {
+        RuleFor(x => x.Year)
+            .Must(x => x >= 1900 && x <= DateTime.Now.Year);
+        RuleFor(x => x.Manufacturer)
+            .NotEmpty();
+        RuleFor(x => x.Model)
+            .NotEmpty();
+    }
 }
 
 public sealed class RealEstatePostingDetailsDto : IRealEstatePostingDetails
@@ -48,6 +86,21 @@ public sealed class RealEstatePostingDetailsDto : IRealEstatePostingDetails
     [Required] public int Rooms { get; set; }
 }
 
+public sealed class RealEstatePostingDetailsDtoValidator : AbstractValidator<RealEstatePostingDetailsDto>
+{
+    public RealEstatePostingDetailsDtoValidator()
+    {
+        RuleFor(x => x.Kind)
+            .IsInEnum();
+        RuleFor(x => x.SpacePurpose)
+            .IsInEnum();
+        RuleFor(x => x.Area)
+            .GreaterThanOrEqualTo(0);
+        RuleFor(x => x.Rooms)
+            .GreaterThan(0);
+    }
+}
+
 public sealed class LocationPostingDetailsDto : ILocationPostingDetails
 {
     [Required] public string Country { get; set; }
@@ -56,6 +109,71 @@ public sealed class LocationPostingDetailsDto : ILocationPostingDetails
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
 }
+
+public sealed class LocationPostingDetailsDtoValidator : AbstractValidator<LocationPostingDetailsDto>
+{
+    public LocationPostingDetailsDtoValidator()
+    {
+        RuleFor(x => x.City)
+            .NotNull().When(x => x.Address is not null);
+        RuleFor(x => x.Latitude)
+            .InclusiveBetween(-90, 90).When(x => x.Latitude is not null);
+        RuleFor(x => x.Longitude)
+            .InclusiveBetween(-180, 180).When(x => x.Longitude is not null);
+    }
+}
+
+
+public sealed class PostingDetailsDtoValidator : AbstractValidator<PostingDetailsDto>
+{
+    public PostingDetailsDtoValidator(
+        IValidator<RealEstatePostingDetailsDto> realEstatePostingDetailsDtoValidator,
+        IValidator<VehiclePostingDetailsDto> vehiclePostingDetailsDtoValidator,
+        IValidator<PricingPostingDetailsDto> pricingPostingDetailsDtoValidator,
+        IValidator<LocationPostingDetailsDto> locationPostingDetailsDtoValidator)
+    {
+        // TODO: Figure out how to do a oneof for multiple properties at once.
+        //       I wish C# supported discriminated unions natively.
+        //       This is way too much boilerplate, but it's not like I could just
+        //       easily substitute a generic property for them, or deduce the kind from json key name.
+        RuleFor(x => x.RealEstate)
+            .Null().When(x => x.Vehicle is not null)
+            .WithMessage("Only one kind of product detail can be specified.");
+
+        RuleFor(x => x.Vehicle)
+            .Null().When(x => x.RealEstate is not null)
+            .WithMessage("Only one kind of product detail can be specified.");
+
+        RuleFor(x => x.RealEstate)
+            .NotNull()
+            .When(x => x.Kind == PostingKind.RealEstate);
+
+        RuleFor(x => x.Vehicle)
+            .NotNull()
+            .When(x => x.Kind == PostingKind.Vehicle);
+        
+        RuleFor(x => x.Kind)
+            .IsInEnum();
+        
+        // Apply the validators for each kind of detail
+        RuleFor(x => x.RealEstate!)
+            .SetValidator(realEstatePostingDetailsDtoValidator)
+            .When(x => x.RealEstate is not null);
+        
+        RuleFor(x => x.Vehicle!)
+            .SetValidator(vehiclePostingDetailsDtoValidator)
+            .When(x => x.Vehicle is not null);
+        
+        RuleFor(x => x.Pricing!)
+            .SetValidator(pricingPostingDetailsDtoValidator)
+            .When(x => x.Pricing is not null);
+        
+        RuleFor(x => x.Location!)
+            .SetValidator(locationPostingDetailsDtoValidator)
+            .When(x => x.Location is not null);
+    }
+}
+
 
 public sealed class PostingGetDto_Detailed : IPostingIdentification
 {
@@ -81,6 +199,17 @@ public sealed class PostingCreateDto
     [Required] public string Description { get; set; }
     [Required] public string ThumbnailUrl { get; set; }
     [Required] public PostingDetailsDto Details { get; set; }
+}
+
+public sealed class PostingCreateDtoValidator : AbstractValidator<PostingCreateDto>
+{
+    public PostingCreateDtoValidator(IValidator<PostingDetailsDto> detailsValidator)
+    {
+        RuleFor(x => x.Title)
+            .NotEmpty();
+        RuleFor(x => x.Details)
+            .SetValidator(detailsValidator);
+    }
 }
 
 #pragma warning restore 8618 // Disable nullability warnings

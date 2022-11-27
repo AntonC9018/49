@@ -2,13 +2,16 @@
 using AspNetCore.Proxy;
 #endif
 using System.Net;
+using FluentValidation;
 using fourtynine;
 using fourtynine.DataAccess;
 using fourtynine.Development;
 using fourtynine.Navbar;
 using fourtynine.Postings;
+using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.Swagger;
 using Unchase.Swashbuckle.AspNetCore.Extensions.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -116,17 +119,26 @@ builder.Services.AddAuthentication(defaultScheme: ProjectConfiguration.AuthCooki
     .AddCookie(ProjectConfiguration.AuthCookieName, options =>
     {
         options.Cookie.Name = ProjectConfiguration.AuthCookieName;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.HttpOnly = true;
         
-        // Only redirect get requests.
+        // Only redirect non-api requests.
         options.Events.OnRedirectToLogin = context =>
         {
-            if (context.HttpContext.Request.Method != "GET")
+            if (context.Request.Path.StartsWithSegments("/api"))
                 context.Response.StatusCode = (int) HttpStatusCode.Unauthorized;
             else
                 context.Response.Redirect(context.RedirectUri);
+
             return Task.CompletedTask;
         };
     });
+
+builder.Services.AddValidatorsFromAssembly(
+    typeof(PostingCreateDtoValidator).Assembly,
+    lifetime: ServiceLifetime.Singleton);
+builder.Services.AddFluentValidationRulesToSwagger();
 
 var app = builder.Build();
 

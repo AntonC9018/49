@@ -74,7 +74,7 @@ public static class RoutingHelper
     }
 }
 
-public class ApiRoute : RouteAttribute
+public sealed class ApiRoute : RouteAttribute
 {
     public ApiRoute(string template = "api/[controller]") : base(template)
     {
@@ -83,7 +83,7 @@ public class ApiRoute : RouteAttribute
 
 // Enables API conventions, like [ApiController],
 // while also applying the default content types.
-public class ApiControllerConventionAttribute : Attribute,
+public sealed class ApiControllerConventionAttribute : Attribute,
     IControllerModelConvention,
     IApiBehaviorMetadata
 {
