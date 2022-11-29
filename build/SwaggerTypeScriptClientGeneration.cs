@@ -43,9 +43,16 @@ partial class Build
                     foreach (var (propertyName, property) in schema.Properties)
                     {
                         var propSchema = property.ActualSchema;
-                        string typeNameText = reverseMap.TryGetValue(propSchema, out string typeName)
-                            ? $"\"{typeName}\""
-                            : "null";
+
+                        string typeNameText;
+                        if (reverseMap.TryGetValue(propSchema, out string typeName))
+                            typeNameText = $"\"{typeName}\"";
+                        // This check does not work for enums, even if they are represented by numbers.
+                        else if (propSchema.Type == JsonObjectType.Number)
+                            typeNameText = "\"number\"";
+                        else
+                            typeNameText = "null";
+                        
                         builder.Append("        ");
                         builder.AppendLine($"{{ name: \"{propertyName}\", schemaTypeName: {typeNameText} }},");
                     }

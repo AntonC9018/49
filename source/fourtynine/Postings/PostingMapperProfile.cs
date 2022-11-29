@@ -12,14 +12,14 @@ public class PostingMapperProfile : Profile
         CreateMap<Author, PostingAuthorGetDto>(MemberList.Destination);
         CreateMap<Posting, PostingGetDto_General>(MemberList.Destination)
             .ForMember(d => d.Slug, 
-            opt => opt.Ignore());
+                opt => opt.Ignore());
         CreateMap<Posting, PostingGetDto_Detailed>(MemberList.Destination)
             .ForMember(d => d.General,
-            opt => opt.MapFrom(s => s))
+                opt => opt.MapFrom(s => s))
             .ForMember(d => d.PictureUrls,
-            opt => opt.MapFrom(s => s.Pictures.Select(p => p.Url)))
+                opt => opt.MapFrom(s => s.Pictures.Select(p => p.Url)))
             .ForMember(d => d.Details,
-            opt => opt.MapFrom(s => s));
+                opt => opt.MapFrom(s => s));
 
         CreateMap<Posting, PostingDetailsDto>(MemberList.Destination)
             .ReverseMap();

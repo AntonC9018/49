@@ -1,6 +1,6 @@
 ﻿import {
     ApiPropertyTable, Client,
-    PostingCreate, ProblemDetails,
+    PostingCreate, PostingKind, ProblemDetails,
 } from "./api-client";
 
 export {}
@@ -12,6 +12,8 @@ function initializePostingForm()
     const form = document.querySelector(`form[name="postingForm"]`) as HTMLFormElement;
     validateForm(form, "PostingCreate", "Posting.");
     
+    // Toggleable sections.
+    const detailsTogglers : Array<HTMLInputElement> = [];
     // It would've been way easier to do with a framework.
     form.querySelectorAll(`div[enable-when]`).forEach(div =>
     {
@@ -19,7 +21,8 @@ function initializePostingForm()
         const toggler = document.getElementById(togglerId) as HTMLInputElement;
         if (!toggler)
             throw new Error(`Toggler with id '${togglerId}' not found.`);
-
+        
+        detailsTogglers.push(toggler);
         function toggle()
         {
             div!.classList.toggle("hidden", !toggler.checked);
@@ -28,71 +31,91 @@ function initializePostingForm()
         toggle();
     });
     
-    const client = new Client(undefined, {
-        // Custom fetch implementation that adds the anti-forgery token.
-        fetch: (url: RequestInfo, init?: RequestInit): Promise<Response> =>
-        {
-            init ??= {};
-            init.headers ??= {};
-
-            const xsrfToken = document.querySelector(`input[name="__RequestVerificationToken"]`) as HTMLInputElement;
-
-            // the generated code only uses the dictionary convention.
-            const headers = <Record<string, string>> init.headers;
-            
-            // https://learn.microsoft.com/en-us/aspnet/web-api/overview/security/preventing-cross-site-request-forgery-csrf-attacks#anti-csrf-and-ajax
-            headers["RequestVerificationToken"] = xsrfToken.value;
-
-            return fetch(url, init);
-        }
-    });
+    // Discriminated union of posting details.
+    const postingDetailsDivs : Array<HTMLDivElement> = [];
+    for (const detailKind in PostingKind)
+    {
+        // Looping over only values requires a hack
+        if (isNaN(+detailKind))
+            continue;
+        
+        const input = form.querySelector(`div[for-kind='${PostingKind[detailKind]}']`) as HTMLDivElement;
+        if (input == null)
+            throw new Error(`Input for kind '${PostingKind[detailKind]}' not found.`);
+        postingDetailsDivs.push(input);
+    }
+    
+    const kindDropdown = form.querySelector("select[name='Posting.Details.Kind']")! as HTMLSelectElement;
+    function toggleDetailsUnion()
+    {
+        for (const div of postingDetailsDivs)
+            div.classList.toggle("hidden", true);
+        postingDetailsDivs[+kindDropdown.value].classList.toggle("hidden", false);
+    }
+    kindDropdown.addEventListener("change", toggleDetailsUnion);
+    toggleDetailsUnion();
+    
+    const client = new Client();
     form.addEventListener("submit", async function (event)
     {
         event.preventDefault();
         const form = event.target as HTMLFormElement;
         const formData = new FormData(form);
-        const dto = mapShallowObject(formData) as PostingCreate;
+
+        // This does not take into account the actual expected type of the model.
+        // There is no easy way to do this, because typescript has no reflection,
+        // while the reflection package is buggy and does not work with unions with undefined.
+        // See issue: https://github.com/Hookyns/tst-reflect/issues/83
+        // Hence there's no easy way to check for nulls either.
+        // I'm surprised how bad the javascript solutions for this are,
+        // nobody knows how to do this conversion reliably.
+        // I'm not a javascript mastermind, so I'll settle for the mediocre solution for now.
+        const dto = mapFormDataToObject(formData) as PostingCreate;
         
-        // Set unchecked details to null.
-        for (const prop of ApiPropertyTable.PostingDetails)
+        if (dto.Details != null)
         {
-            const key = "Posting.Details." + prop.name;
-            const toggler = document.getElementById(key) as HTMLInputElement;
-            if (toggler.checked)
-                continue;
+            // Set unchecked details to null.
+            for (const toggler of detailsTogglers)
+            {
+                if (toggler.checked)
+                    continue;
+                const propName = toggler.id.substring("Posting.Details.".length);
+                (<any> dto.Details)[propName] = undefined;
+            }
             
-            (<any> dto.Details)[prop.name] = null;
+            // Only leave the relevant discriminated union bit.
+            const selectedKind = +kindDropdown.value;
+            for (let i = 0; i < postingDetailsDivs.length; i++)
+            {
+                if (selectedKind !== i)
+                    (<any> dto.Details)[PostingKind[selectedKind]] = undefined;
+            }
         }
         
         try
         {
             const response = await client.postingPOST(dto);
-            window.location.assign(`/Postings/${response.General.Id}/${response.General.Slug}`);            
+            window.location.assign(`/Postings/${response.General.Id}/${response.General.Slug}`);
         }
         catch (e: any)
-        {
-            // if (!ApiException.isApiException(e))
-            //     throw e;
-            console.log(e);
-            
+        {            
             // Temporary thing.
             function toast(str: string)
-            {
-                const toast = document.createElement("div");
-                toast.classList.add("toast");
-                toast.innerText = str;
-                document.body.appendChild(toast);
-                setTimeout(() => toast.remove(), 5000);
-                
+            {                
                 console.error(str);
             }
 
             const serverException = e as ProblemDetails;
             if (serverException && serverException.errors)
             {
-                console.error(serverException.title);
                 for (let [field, error] of Object.entries(serverException.errors))
-                    console.error(`${field}: ${error}`);
+                {
+                    const input = form.querySelector(`[name="Posting.${field}"]`) as HTMLInputElement;
+                    if (input)
+                        input.setCustomValidity(error!.toString());
+                    else
+                        console.log(`Field '${field}' not found. Error message: ${error}`);
+                }
             }
 
             switch (e.status)
@@ -128,12 +151,7 @@ function validateForm(form: HTMLFormElement, schemaName: ApiSchemaName, namePref
     {
         const element = form.elements[i];
         let name = element.getAttribute('name');
-        if (!name)
-            continue;
-        // I don't know how to handle this yet.
-        if (name == "__RequestVerificationToken")
-            continue;
-        if (!name.startsWith(namePrefix))
+        if (!name || !name.startsWith(namePrefix))
             continue;
         
         name = name.substring(namePrefix.length);
@@ -160,49 +178,41 @@ function _getDeepPropertyKeys(type: ApiSchemaName, prefix: string, output : stri
     for (let prop of ApiPropertyTable[type])
     {
         let p = prefix + prop.name;
-        if (prop.schemaTypeName)
+        if (prop.schemaTypeName && prop.schemaTypeName !== "number")
             _getDeepPropertyKeys(<ApiSchemaName> prop.schemaTypeName, p + ".", output);
         else
             output.push(p);
     }
 }
 
-// @ts-ignore
-function findDeepKeys(obj: Record<string, any>)
+function mapFormDataToObject(formData: FormData) : Record<string, any>
 {
-    let output = new Set<string>();
-    _findDeepKeys(obj, "", output);
-    return output;
-}
-
-function _findDeepKeys(obj: Record<string, any>, prefix: string, output : Set<string>)
-{
-    for (let key in obj)
-    {
-        if (!obj.hasOwnProperty(key))
-            continue;
-        
-        let newPrefix = prefix + key + ".";
-        if (typeof obj[key] == "object")
-            _findDeepKeys(obj[key], newPrefix, output);
-        else
-            output.add(newPrefix);
-    }
-}
-
-// maps objects of form `{ "a.b": value }` to `{ a: { b: value } }`
-function mapShallowObject(sourceObject: Record<string, any>)
-{
-    if (!sourceObject)
-        return sourceObject;
     let result : Record<string, any> = {};
-    for (let key in sourceObject)
+    
+    formData.forEach((entry, key) =>
     {
-        // Hack. https://stackoverflow.com/a/16175212/9731532
-        if (!sourceObject.hasOwnProperty(key))
-            continue;
-
-        const parts = key.split(".");
+        function convert(str: string|File) : any
+        {
+            if (!str)
+                return null;
+            
+            let number = Number(str);
+            if (!isNaN(number))
+                return number;
+            
+            if (str === "true")
+                return true;
+            if (str === "false")
+                return false;
+            
+            return str;
+        }
+        
+        const value = convert(entry);
+        if (value === null)
+            return;
+        
+        const parts = key.split('.');
         let current = result;
         for (let i = 0; i < parts.length - 1; i++)
         {
@@ -212,7 +222,7 @@ function mapShallowObject(sourceObject: Record<string, any>)
             current = current[part];
         }
         const lastPart = parts[parts.length - 1];
-        current[lastPart] = sourceObject[key];
-    }
+        current[lastPart] = value;
+    });
     return result;
 }

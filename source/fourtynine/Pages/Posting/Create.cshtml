@@ -25,8 +25,8 @@
   <form
     autocomplete="on"
     name="postingForm"
+    asp-antiforgery="false"
   >
-    @Html.AntiForgeryToken()
     @Html.InputFor(m => m.Posting.Title)
     @Html.InputFor(m => m.Posting.Description)
     @Html.InputFor(m => m.Posting.ThumbnailUrl)
@@ -53,23 +53,15 @@
       @Html.EditorFor(m => m.Posting.Details.Location)
     </div>
     
-    <CheckBox
-      for="Posting.Details.RealEstate"
-      label="Real Estate?">
-    </CheckBox>
+    @Html.DropDownFor(m => m.Posting.Details.Kind)
     
     @* This will require a bunch of custom javascript *@
-    <div enable-when="Posting.Details.RealEstate">
+    <div for-kind="RealEstate">
       <h2 class="text-lg text-center">Real Estate</h2>
       @Html.EditorFor(m => m.Posting.Details.RealEstate)
     </div>
     
-    <CheckBox
-      for="Posting.Details.Vehicle"
-      label="Vehicle?">
-    </CheckBox>
-    
-    <div enable-when="Posting.Details.Vehicle">
+    <div for-kind="Vehicle">
       <h2 class="text-lg text-center">Vehicle</h2>
       @Html.EditorFor(m => m.Posting.Details.Vehicle)
     </div>

@@ -3,6 +3,7 @@ using AspNetCore.Proxy;
 #endif
 using System.Net;
 using FluentValidation;
+using FluentValidation.AspNetCore;
 using fourtynine;
 using fourtynine.DataAccess;
 using fourtynine.Development;
@@ -139,6 +140,15 @@ builder.Services.AddValidatorsFromAssembly(
     typeof(PostingCreateDtoValidator).Assembly,
     lifetime: ServiceLifetime.Singleton);
 builder.Services.AddFluentValidationRulesToSwagger();
+
+// We cannot use client side validation for postings, because we have some nested
+// objects that are only active according to some other flags.
+// Since the client side validation cannot handle checks, like When clauses in fluent validation,
+// there's no way to apply some rules only conditionally.
+// This means client side validation will either have to be done manually, or we have to settle for a
+// library to do said validation on the server.
+// https://github.com/sinanbozkus/FormHelper
+// builder.Services.AddFluentValidationClientsideAdapters();
 
 var app = builder.Build();
 

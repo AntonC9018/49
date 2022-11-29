@@ -267,18 +267,19 @@ export class Client {
     }
 }
 
-/** 1 = Offer 2 = Request 4 = Permanent 5 = Sale 6 = Buy 8 = Temporary 9 = Rent 10 = Lease 13 = SaleOrRent 14 = BuyOrLease */
+/** 1 = Offer 2 = Request 4 = Permanent 5 = Sell 6 = Buy 8 = Temporary 9 = Rent 10 = Lease 13 = SaleOrRent 14 = BuyOrLease 15 = All */
 export enum BargainKinds {
     Offer = 1,
     Request = 2,
     Permanent = 4,
-    Sale = 5,
+    Sell = 5,
     Buy = 6,
     Temporary = 8,
     Rent = 9,
     Lease = 10,
     SaleOrRent = 13,
     BuyOrLease = 14,
+    All = 15,
 }
 
 export class INavbarAction implements IINavbarAction {
@@ -470,9 +471,10 @@ export interface IPostingCreate {
 
 export class PostingDetails implements IPostingDetails {
     Pricing?: PricingPostingDetails;
-    Vehicle?: VehiclePostingDetails;
-    RealEstate?: RealEstatePostingDetails;
     Location?: LocationPostingDetails;
+    Kind?: PostingKind;
+    RealEstate?: RealEstatePostingDetails;
+    Vehicle?: VehiclePostingDetails;
 
     constructor(data?: IPostingDetails) {
         if (data) {
@@ -486,9 +488,10 @@ export class PostingDetails implements IPostingDetails {
     init(_data?: any) {
         if (_data) {
             this.Pricing = _data["Pricing"] ? PricingPostingDetails.fromJS(_data["Pricing"]) : <any>undefined;
-            this.Vehicle = _data["Vehicle"] ? VehiclePostingDetails.fromJS(_data["Vehicle"]) : <any>undefined;
-            this.RealEstate = _data["RealEstate"] ? RealEstatePostingDetails.fromJS(_data["RealEstate"]) : <any>undefined;
             this.Location = _data["Location"] ? LocationPostingDetails.fromJS(_data["Location"]) : <any>undefined;
+            this.Kind = _data["Kind"];
+            this.RealEstate = _data["RealEstate"] ? RealEstatePostingDetails.fromJS(_data["RealEstate"]) : <any>undefined;
+            this.Vehicle = _data["Vehicle"] ? VehiclePostingDetails.fromJS(_data["Vehicle"]) : <any>undefined;
         }
     }
 
@@ -502,18 +505,20 @@ export class PostingDetails implements IPostingDetails {
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["Pricing"] = this.Pricing ? this.Pricing.toJSON() : <any>undefined;
-        data["Vehicle"] = this.Vehicle ? this.Vehicle.toJSON() : <any>undefined;
-        data["RealEstate"] = this.RealEstate ? this.RealEstate.toJSON() : <any>undefined;
         data["Location"] = this.Location ? this.Location.toJSON() : <any>undefined;
+        data["Kind"] = this.Kind;
+        data["RealEstate"] = this.RealEstate ? this.RealEstate.toJSON() : <any>undefined;
+        data["Vehicle"] = this.Vehicle ? this.Vehicle.toJSON() : <any>undefined;
         return data;
     }
 }
 
 export interface IPostingDetails {
     Pricing?: PricingPostingDetails;
-    Vehicle?: VehiclePostingDetails;
-    RealEstate?: RealEstatePostingDetails;
     Location?: LocationPostingDetails;
+    Kind?: PostingKind;
+    RealEstate?: RealEstatePostingDetails;
+    Vehicle?: VehiclePostingDetails;
 }
 
 export class PostingGetDetailed implements IPostingGetDetailed {
@@ -632,6 +637,12 @@ export interface IPostingGetGeneral {
     ThumbnailUrl: string;
     DatePosted: Date;
     Slug: string;
+}
+
+/** 0 = RealEstate 1 = Vehicle */
+export enum PostingKind {
+    RealEstate = 0,
+    Vehicle = 1,
 }
 
 export class PricingPostingDetails implements IPricingPostingDetails {
@@ -894,8 +905,8 @@ export const ApiPropertyTable = {
         { name: "Country", schemaTypeName: null },
         { name: "City", schemaTypeName: null },
         { name: "Address", schemaTypeName: null },
-        { name: "Latitude", schemaTypeName: null },
-        { name: "Longitude", schemaTypeName: null },
+        { name: "Latitude", schemaTypeName: "number" },
+        { name: "Longitude", schemaTypeName: "number" },
     ],
     PostingAuthorGet: [
         { name: "Id", schemaTypeName: null },
@@ -910,9 +921,10 @@ export const ApiPropertyTable = {
     ],
     PostingDetails: [
         { name: "Pricing", schemaTypeName: "PricingPostingDetails" },
-        { name: "Vehicle", schemaTypeName: "VehiclePostingDetails" },
-        { name: "RealEstate", schemaTypeName: "RealEstatePostingDetails" },
         { name: "Location", schemaTypeName: "LocationPostingDetails" },
+        { name: "Kind", schemaTypeName: null },
+        { name: "RealEstate", schemaTypeName: "RealEstatePostingDetails" },
+        { name: "Vehicle", schemaTypeName: "VehiclePostingDetails" },
     ],
     PostingGetDetailed: [
         { name: "General", schemaTypeName: "PostingGetGeneral" },
@@ -928,10 +940,12 @@ export const ApiPropertyTable = {
         { name: "DatePosted", schemaTypeName: null },
         { name: "Slug", schemaTypeName: null },
     ],
+    PostingKind: [
+    ],
     PricingPostingDetails: [
         { name: "BargainKinds", schemaTypeName: null },
-        { name: "Price", schemaTypeName: null },
-        { name: "PriceMax", schemaTypeName: null },
+        { name: "Price", schemaTypeName: "number" },
+        { name: "PriceMax", schemaTypeName: "number" },
     ],
     ProblemDetails: [
         { name: "type", schemaTypeName: null },
@@ -945,7 +959,7 @@ export const ApiPropertyTable = {
     RealEstatePostingDetails: [
         { name: "Kind", schemaTypeName: null },
         { name: "SpacePurpose", schemaTypeName: null },
-        { name: "Area", schemaTypeName: null },
+        { name: "Area", schemaTypeName: "number" },
         { name: "Rooms", schemaTypeName: null },
     ],
     RealEstateSpacePurpose: [
