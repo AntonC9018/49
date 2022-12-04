@@ -1,19 +1,29 @@
 ﻿@page
-@model fourtynine.Pages.Account.Login
+@model fourtynine.Pages.Account.LogIn
 
 @{
-    Layout = null;
+    Layout = "Shared/_BarebonesLayout";
+    ViewData["Title"] = "Login";
 }
 
-<!DOCTYPE html>
+<h1>Sign in</h1>
 
-<html>
-<head>
-    <title></title>
-</head>
-<body>
-<div>
+@foreach (var scheme in Model.Schemes)
+{
+    <form asp-page="@Model.PageName" method="get">
+      <input type="hidden" asp-for="ProviderName" value="@scheme.Name" />
     
-</div>
-</body>
-</html>
+      <button
+        class="
+          x-6
+          py-2.5
+          bg-blue-600
+          text-white
+          font-medium
+        "
+        type="submit"
+      >
+      Sign in using @scheme.DisplayName
+      </button>
+    </form>
+}

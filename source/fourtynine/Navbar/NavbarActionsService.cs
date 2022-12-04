@@ -67,6 +67,13 @@ public record NavbarPageAction(
     }
 }
 
+public record NavbarMinimalApiAction(
+    string Path,
+    string DisplayName) : INavbarAction
+{
+    public bool IsMatch(in RouteInfo routeInfo) => false;
+}
+
 public interface INavbarActionsService
 {
     IEnumerable<INavbarAction> NavbarActions { get; }
@@ -105,11 +112,7 @@ public class NavbarActionsService : INavbarActionsService
             page: "/Account/Login",
             "Login");
         
-        Logout = NavbarPageAction.Create(
-            linkGenerator,
-            page: "/Account/Logout",
-            "Logout");
-        
+        Logout = new NavbarMinimalApiAction("/Account/Logout","Logout");
 
         _navbarActions = new INavbarAction[]
         {

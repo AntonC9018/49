@@ -1,0 +1,89 @@
+﻿@page
+@using System.Collections
+@using fourtynine.Pages.Account
+@using Microsoft.AspNetCore.Html
+@model fourtynine.Pages.Account.Account
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Account";
+}
+
+@*
+    TODO: fix indentation. It should be 2 spaces for html and 4 for C# code.
+    The editor doesn't think this is right, it just autodetects 4,
+    which is maybe how it should be, I'm not sure.
+*@
+
+<div 
+    class="
+        shadow-lg
+        mx-auto
+        bg-white
+        flex items-center
+        w-full
+        mt-24
+        md:mt-18
+        min-h-screen
+        flex-col
+  "
+>
+    @* The loops are necessary to get rid of code duplication *@
+    @foreach (var t in Model.Tables)
+    {
+        <h2>t.Name</h2>
+        <table
+            class="
+                w-fit
+                table-auto
+                text-sm
+                text-left
+                text-gray-500
+                dark:text-gray-400
+            "
+        >
+            <tr
+                class="
+                    text-xs
+                    text-gray-700
+                    uppercase
+                    bg-gray-50
+                    dark:bg-gray-600
+                    dark:text-gray-400
+                "
+            >
+                <th scope="col" class="py-3 px-5">Type</th>
+                <th scope="col" class="py-3 px-5">Value</th>
+            </tr>
+            @foreach (var (index, row) in t.Rows.Select((r, i) => (i, r)))
+            {
+                <tr
+                    class="
+                        bg-white
+                        border-b
+                        @(index % 2 == 0 ? "dark:bg-gray-700" : "dark:bg-gray-800")
+                        dark:border-gray-700
+                    "
+                >
+                    <td class="py-3 px-5">@row.Type</td>
+                    <td class="py-3 px-5">
+                        @if (row.IsImage)
+                        {
+                            <img 
+                                class="
+                                    object-scale-down
+                                    max-h-48
+                                "
+                                src="@row.Value"
+                                alt="@row.Type"/>
+                        }
+                        else
+                        {
+                            @row.Value
+                        }
+                    </td>
+                </tr>
+            }
+        </table>
+    }
+</div> 

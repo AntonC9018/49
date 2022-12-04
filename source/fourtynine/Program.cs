@@ -2,6 +2,7 @@
 using AspNetCore.Proxy;
 #endif
 using System.Net;
+using System.Security.Claims;
 using FluentValidation;
 using fourtynine;
 using fourtynine.DataAccess;
@@ -9,6 +10,8 @@ using fourtynine.Development;
 using fourtynine.Navbar;
 using fourtynine.Postings;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Unchase.Swashbuckle.AspNetCore.Extensions.Extensions;
@@ -121,6 +124,8 @@ builder.Services.AddAuthentication(defaultScheme: ProjectConfiguration.AuthCooki
         options.Cookie.SameSite = SameSiteMode.Lax;
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
         options.Cookie.HttpOnly = true;
+        options.LoginPath = "/Account/Login";
+        options.LogoutPath = "/Account/Logout";
         
         // Only redirect non-api requests.
         options.Events.OnRedirectToLogin = context =>
@@ -130,6 +135,21 @@ builder.Services.AddAuthentication(defaultScheme: ProjectConfiguration.AuthCooki
             else
                 context.Response.Redirect(context.RedirectUri);
 
+            return Task.CompletedTask;
+        };
+    })
+    .AddGitHub(options =>
+    {
+        options.SignInScheme = ProjectConfiguration.AuthCookieName;
+        options.CallbackPath = "/account/authorize/GitHub";
+        options.ClientId = builder.Configuration["OAuthGithubClientId"];
+        options.ClientSecret = builder.Configuration["OAuthGithubClientSecret"];
+
+        options.SaveTokens = true;
+        options.Scope.Add("read:user");
+        options.Events.OnCreatingTicket += context =>
+        {
+            context.MaybeAddAccessTokenClaim();
             return Task.CompletedTask;
         };
     });
@@ -149,8 +169,6 @@ builder.Services.AddFluentValidationRulesToSwagger();
 // builder.Services.AddFluentValidationClientsideAdapters();
 
 var app = builder.Build();
-
-Console.WriteLine(app.Services.GetRequiredService<IConfiguration>()["github-oath"]);
 
 if (isDevelopment)
     app.EnsureDatabaseCreated<PostingsDbContext>();
@@ -196,6 +214,16 @@ app.UseEndpoints(endpoints =>
     if (isDevelopment)
         endpoints.MapReverseProxy();
 #endif
+    
+    endpoints.MapGet("/Account/Logout", async ctx =>
+    {
+        await ctx.SignOutAsync(
+            ProjectConfiguration.AuthCookieName,
+            new AuthenticationProperties
+            {
+                RedirectUri = "/"
+            });
+    });
 });
 
 // The minimal API implementation seems to be the only thing that works correctly.

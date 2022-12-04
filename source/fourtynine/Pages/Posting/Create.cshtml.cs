@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace fourtynine.Postings;
 
+[Authorize]
 public class CreatePostingPageModel : PageModel
 {
     [BindProperty]

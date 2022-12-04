@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Net.Mime;
+using System.Security.Claims;
 using fourtynine.Navbar;
+using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -67,7 +69,14 @@ public static class RoutingHelper
         }
 
         return new RouteInfo(controller, GetCurrentActionName(view));
+    }
 
+    public static string? GetPage(this RouteData routeData) => (string?) routeData.Values["page"];
+    
+    public static string? GetCurrentPage(this ViewContext view)
+    {
+        string? page = (string?) view.RouteData.Values["page"];
+        return page;
     }
 }
 
@@ -109,3 +118,32 @@ public sealed class ApiControllerConventionAttribute : Attribute,
 //     {
 //     }
 // } 
+
+public static class ClaimHelper
+{
+    public const string AccessTokenType = "access_token";
+    
+    public static Claim? MaybeAddAccessTokenClaim(this OAuthCreatingTicketContext context)
+    {
+        if (context.Identity is null)
+            return null;
+        
+        var accessToken = context.AccessToken;
+        if (accessToken is null)
+            return null;
+        
+        var claim = new Claim(AccessTokenType, accessToken);
+        context.Identity.AddClaim(claim);
+        return claim;
+    }
+    
+    public static string? GetAccessToken(this ClaimsPrincipal principal)
+    {
+        return principal.FindFirstValue(AccessTokenType);
+    }
+    
+    public static bool IsAccessToken(this Claim claim)
+    {
+        return claim.Type == AccessTokenType;
+    }
+}
