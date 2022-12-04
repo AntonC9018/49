@@ -59,3 +59,22 @@ See e.g. [this stackoverflow answer](https://stackoverflow.com/a/55474543/973153
 It involves some really tricky magic and introduces a lot of boilerplate just to juggle the contexts.
 So I decided to ditch the tag helpers and use html helpers, specifically editor/display templates. These just use html helpers to achieve the same effect. Rendering these inside partials still involves some magical context juggling, but it's far less annoying. The documentation is sparse too.
 See [this blog](https://cpratt.co/displaytemplates-and-editortemplates-for-fun-and-profit/) for some enlightenment on the topic.
+
+I wanted to implement authentication using services like GitHub or Google.
+These require you to register an application, and then use the secret you get from them to use in the OpenIDConnect or OAuth2 flows.
+The existence of secrets means that they have to be shared or recreated on developer machines, but checking them in with the source code is obviously a bad practice.
+This calls for a cloud service for sharing secrets.
+I've landed on [Azure Key Vault](https://azure.microsoft.com/en-us/services/key-vault/), because it's free with my student pack license.
+
+The three things I wanted to be able to do were the following:
+- Be able to access the secrets from any machine, as long as I'm logged in as myself;
+- Be able to grant or revoke access to the vault to specific users;
+- If I'm not authenticated on a new machine, I want an automated log in process, possibly in the restore Nuke task.
+
+Things aren't so simple though.
+Since my credit is tied with the active directory of my university, I won't be able to give access to the vault to users outside my university (I think).
+I can create a new active directory, but that won't have the credit anymore.
+
+Also, there are multiple authentication concepts for Azure Key Vault, not just Azure Active Directory, but also Managed Identity, RBAC, which I have not worked with and hence don't know which one to use if any and whether I can even use them for this.
+
+So, for the sake of progress, I'll fall back to storing the secrets locally with [the secret manager tool](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-7.0&tabs=windows#how-the-secret-manager-tool-works), so the secrets will either have to be shared on to the new machines, or generated again.

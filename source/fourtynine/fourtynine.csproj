@@ -43,10 +43,4 @@
     <ProjectReference Include="..\fourtynine.DataAccess\fourtynine.DataAccess.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <AdditionalFiles Include="Pages\Index.cshtml" />
-    <AdditionalFiles Include="Pages\Privacy.cshtml" />
-    <AdditionalFiles Include="Pages\Shared\Partials\CheckBox.cshtml" />
-  </ItemGroup>
-
 </Project>

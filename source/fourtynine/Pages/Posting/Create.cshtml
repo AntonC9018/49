@@ -36,7 +36,6 @@
       label="Price?">
     </CheckBox>
     
-    @* This will require a bunch of custom javascript *@
     <div enable-when="Posting.Details.Pricing">
       <h2 class="text-lg text-center">Pricing</h2>
       @Html.EditorFor(m => m.Posting.Details.Pricing)
@@ -47,7 +46,6 @@
       label="Location?">
     </CheckBox>
     
-    @* This will require a bunch of custom javascript *@
     <div enable-when="Posting.Details.Location">
       <h2 class="text-lg text-center">Location</h2>
       @Html.EditorFor(m => m.Posting.Details.Location)
@@ -55,14 +53,11 @@
     
     @Html.DropDownFor(m => m.Posting.Details.Kind)
     
-    @* This will require a bunch of custom javascript *@
     <div for-kind="RealEstate">
-      <h2 class="text-lg text-center">Real Estate</h2>
       @Html.EditorFor(m => m.Posting.Details.RealEstate)
     </div>
     
     <div for-kind="Vehicle">
-      <h2 class="text-lg text-center">Vehicle</h2>
       @Html.EditorFor(m => m.Posting.Details.Vehicle)
     </div>
     

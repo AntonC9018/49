@@ -3,7 +3,6 @@ using AspNetCore.Proxy;
 #endif
 using System.Net;
 using FluentValidation;
-using FluentValidation.AspNetCore;
 using fourtynine;
 using fourtynine.DataAccess;
 using fourtynine.Development;
@@ -12,7 +11,6 @@ using fourtynine.Postings;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.Swagger;
 using Unchase.Swashbuckle.AspNetCore.Extensions.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -151,6 +149,8 @@ builder.Services.AddFluentValidationRulesToSwagger();
 // builder.Services.AddFluentValidationClientsideAdapters();
 
 var app = builder.Build();
+
+Console.WriteLine(app.Services.GetRequiredService<IConfiguration>()["github-oath"]);
 
 if (isDevelopment)
     app.EnsureDatabaseCreated<PostingsDbContext>();

@@ -1,10 +1,7 @@
-﻿using System;
-using System.Data.Common;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Net.Mime;
 using fourtynine.Navbar;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;

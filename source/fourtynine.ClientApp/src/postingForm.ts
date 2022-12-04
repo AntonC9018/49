@@ -70,7 +70,7 @@ function initializePostingForm()
         // I'm surprised how bad the javascript solutions for this are,
         // nobody knows how to do this conversion reliably.
         // I'm not a javascript mastermind, so I'll settle for the mediocre solution for now.
-        const dto = mapFormDataToObject(formData) as PostingCreate;
+        const dto = mapFormDataToObject(formData)["Posting"] as PostingCreate;
         
         if (dto.Details != null)
         {
@@ -80,15 +80,17 @@ function initializePostingForm()
                 if (toggler.checked)
                     continue;
                 const propName = toggler.id.substring("Posting.Details.".length);
-                (<any> dto.Details)[propName] = undefined;
+                delete (<any> dto.Details)[propName];
             }
             
             // Only leave the relevant discriminated union bit.
             const selectedKind = +kindDropdown.value;
             for (let i = 0; i < postingDetailsDivs.length; i++)
             {
-                if (selectedKind !== i)
-                    (<any> dto.Details)[PostingKind[selectedKind]] = undefined;
+                if (selectedKind === i)
+                    continue;
+                const key = PostingKind[selectedKind];
+                delete (<any> dto.Details)[key];
             }
         }
         
@@ -105,14 +107,24 @@ function initializePostingForm()
                 console.error(str);
             }
 
+            form.querySelectorAll("[data-valmsg-for]")
+                .forEach(validationMessageSpan =>
+                {
+                    validationMessageSpan.innerHTML = "";
+                });
+            
             const serverException = e as ProblemDetails;
             if (serverException && serverException.errors)
             {
                 for (let [field, error] of Object.entries(serverException.errors))
                 {
-                    const input = form.querySelector(`[name="Posting.${field}"]`) as HTMLInputElement;
-                    if (input)
-                        input.setCustomValidity(error!.toString());
+                    const errorString = error?.toString();
+                    if (!errorString)
+                        continue;
+
+                    const validationMessageSpan = form.querySelector(`[data-valmsg-for="Posting.${field}"]`);
+                    if (validationMessageSpan)
+                        validationMessageSpan.textContent = errorString;
                     else
                         console.log(`Field '${field}' not found. Error message: ${error}`);
                 }
@@ -193,7 +205,7 @@ function mapFormDataToObject(formData: FormData) : Record<string, any>
     {
         function convert(str: string|File) : any
         {
-            if (!str)
+            if (str === null || str === "")
                 return null;
             
             let number = Number(str);
