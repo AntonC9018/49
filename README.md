@@ -5,7 +5,11 @@
 2. Install [NodeJS 18+](https://nodejs.org/en/);
 3. Install [SqlServer 2019+](https://www.microsoft.com/en-us/sql-server/sql-server-downloads);
 4. Run the build script in the root folder, which will install [Nuke](https://nuke.build/) and try to do a build.
-
+5. You need to set all secrets using `dotnet user-secrets` for in the folder `source/fourtynine` (see notes on why this is not shared automatically in the notes below):
+  ```
+  dotnet user-secrets OAuthGithubClientId <github client id>
+  dotnet user-secrets OAuthGithubClientSecret <github client secret>
+  ```
 
 To build for production, do `build publish` (or `nuke publish`, which calls the same nuke target).
 The output will be in the `output/app` directory.
@@ -19,11 +23,11 @@ Assuming the database client is installed on your machine, the database should g
 
 If you make changes to the API, the TypeScript client has to be regenerated manually. For that, run `build generateSwaggerTypeScriptClient` while the backend is running.
 
-Tech used:
+## Notes
 
-- [Vite](https://vitejs.dev/) for package management and maybe later some React pages;
+- [Vite](https://vitejs.dev/) has been used for package management and maybe later some React pages;
 
-- [Tailwind](https://tailwindcss.com/) for styling;
+- [Tailwind](https://tailwindcss.com/) has been used for styling;
 
 - I've tried using [YARP](https://microsoft.github.io/reverse-proxy/index.html) to forward asset requests to the Vite server in development.
 This didn't quite work, since the YARP proxy always takes priority over API controllers, even though the developer claims the opposite.
@@ -37,11 +41,11 @@ I'm getting the general impression that proxy API's in ASP.NET Core are quirky a
 
 - Another option I've looked at for proxying was the Microsoft's SPA and SPA Extensions packages, but they're no longer maintained, in favor of YARP, I suppose (YARP is maintained by Microsoft).
 
-- [Nuke](https://nuke.build/) for build automation and script management (I'm not quite sure how good it is for scripts, might be better off doing a custom tool with some references to it instead);
+- [Nuke](https://nuke.build/) has been used for build automation and script management (I'm not quite sure how good it is for scripts, might be better off doing a custom tool with some references to it instead);
 
-- [Entity Framework Core](https://docs.microsoft.com/en-us/ef/core/) with [SqlServer](https://docs.microsoft.com/en-us/ef/core/providers/sql-server/?tabs=dotnet-core-cli) for database access;
+- [Entity Framework Core](https://docs.microsoft.com/en-us/ef/core/) with [SqlServer](https://docs.microsoft.com/en-us/ef/core/providers/sql-server/?tabs=dotnet-core-cli) has been used for database access;
 
-- [NSwag](https://github.com/RicoSuter/NSwag) for generating the TypeScript API client;
+- [NSwag](https://github.com/RicoSuter/NSwag) has been used for generating the TypeScript API client;
 
 - [AutoMapper](https://automapper.org/).
 Tried mapping manually initially, but it's very clear to me that that approach is unmaintainable, resulting in a lot of code duplication, or complications from combining expression trees.
@@ -74,7 +78,8 @@ The three things I wanted to be able to do were the following:
 Things aren't so simple though.
 Since my credit is tied with the active directory of my university, I won't be able to give access to the vault to users outside my university (I think).
 I can create a new active directory, but that won't have the credit anymore.
+I'm sure in a real company on a real project this would not be a problem.
 
-Also, there are multiple authentication concepts for Azure Key Vault, not just Azure Active Directory, but also Managed Identity, RBAC, which I have not worked with and hence don't know which one to use if any and whether I can even use them for this.
+Also, there are multiple authentication concepts for Azure Key Vault, not just Azure Active Directory, but also Managed Identity, RBAC, which I have not worked with and hence don't know which one I need to use if any.
 
 So, for the sake of progress, I'll fall back to storing the secrets locally with [the secret manager tool](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-7.0&tabs=windows#how-the-secret-manager-tool-works), so the secrets will either have to be shared on to the new machines, or generated again.
