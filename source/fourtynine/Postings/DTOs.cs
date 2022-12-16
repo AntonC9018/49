@@ -25,7 +25,7 @@ public sealed class PostingDetailsDto
     public PricingPostingDetailsDto? Pricing { get; set; } 
     public LocationPostingDetailsDto? Location { get; set; }
     
-    public PostingKind Kind { get; set; }
+    [Required] public PostingKind Kind { get; set; }
     public RealEstatePostingDetailsDto? RealEstate { get; set; } 
     public VehiclePostingDetailsDto? Vehicle { get; set; } 
 }

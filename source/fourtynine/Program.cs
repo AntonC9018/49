@@ -94,6 +94,13 @@ builder.Services.AddSwaggerGen(options =>
         .Replace("Dto_", "")
         .Replace("Dto", ""));
     options.AddEnumsWithValuesFixFilters();
+   
+    // Doesn't actually seem to have an effect, might be a bug.
+    // The generated client still accepts nulls even if the properties aren't nullable.
+    // The MVC validation seems to rely on the nullability instead (since it has the
+    // SuppressImplicitRequiredAttributeForNonNullableReferenceTypes configuration property),
+    // hence by default the swagger schema doesn't reflect the actual API fully.
+    // options.SupportNonNullableReferenceTypes();
 });
 
 #if !USE_YARP
