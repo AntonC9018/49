@@ -4,6 +4,7 @@ using FluentValidation;
 using fourtynine.DataAccess;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using DbContext = fourtynine.DataAccess.DbContext;
 
 namespace fourtynine.Postings;
 
@@ -17,10 +18,10 @@ public sealed class SearchQuery
 // needed for the posting operations, like the mapper, validator, etc.
 public sealed class PostingApiService
 {
-    public PostingsDbContext DbContext { get; }
+    public DbContext DbContext { get; }
     public IMapper Mapper { get; }
 
-    public PostingApiService(PostingsDbContext dbContext, IMapper mapper)
+    public PostingApiService(DbContext dbContext, IMapper mapper)
     {
         DbContext = dbContext;
         Mapper = mapper;

@@ -10,8 +10,8 @@ using fourtynine.DataAccess;
 
 namespace fourtynine.DataAccess.Migrations
 {
-    [DbContext(typeof(PostingsDbContext))]
-    partial class PostingsDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(DbContext))]
+    partial class DbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {

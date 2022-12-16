@@ -11,7 +11,7 @@ using fourtynine.DataAccess;
 
 namespace fourtynine.DataAccess.Migrations
 {
-    [DbContext(typeof(PostingsDbContext))]
+    [DbContext(typeof(DbContext))]
     [Migration("20221115222612_InitialCreate")]
     partial class InitialCreate
     {

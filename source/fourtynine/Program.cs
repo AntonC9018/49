@@ -1,6 +1,7 @@
 #if !USE_YARP
 using AspNetCore.Proxy;
 #endif
+using System.Data.Common;
 using System.Net;
 using System.Security.Claims;
 using FluentValidation;
@@ -15,6 +16,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Unchase.Swashbuckle.AspNetCore.Extensions.Extensions;
+using DbContext = fourtynine.DataAccess.DbContext;
 
 var builder = WebApplication.CreateBuilder(args);
 bool isDevelopment = builder.Environment.IsDevelopment();
@@ -48,7 +50,7 @@ if (isDevelopment)
     }
 }
 
-builder.Services.AddDbContext<PostingsDbContext>(options =>
+builder.Services.AddDbContext<DbContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("Postings");
     
@@ -124,27 +126,33 @@ else
 
 builder.Services.AddScoped<PostingApiService>();
 
-builder.Services.AddAuthentication(defaultScheme: ProjectConfiguration.AuthCookieName)
-    .AddCookie(ProjectConfiguration.AuthCookieName, options =>
-    {
-        options.Cookie.Name = ProjectConfiguration.AuthCookieName;
-        options.Cookie.SameSite = SameSiteMode.Lax;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-        options.Cookie.HttpOnly = true;
-        options.LoginPath = "/Account/Login";
-        options.LogoutPath = "/Account/Logout";
+static void ConfigureAuthCookie(CookieAuthenticationOptions options)
+{
+    options.Cookie.Name = ProjectConfiguration.AuthCookieName;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.HttpOnly = true;
+    options.LoginPath = "/Account/Login";
+    options.LogoutPath = "/Account/Logout";
         
-        // Only redirect non-api requests.
-        options.Events.OnRedirectToLogin = context =>
-        {
-            if (context.Request.Path.StartsWithSegments("/api"))
-                context.Response.StatusCode = (int) HttpStatusCode.Unauthorized;
-            else
-                context.Response.Redirect(context.RedirectUri);
+    // Only redirect non-api requests.
+    options.Events.OnRedirectToLogin = context =>
+    {
+        if (context.Request.Path.StartsWithSegments("/api"))
+            context.Response.StatusCode = (int) HttpStatusCode.Unauthorized;
+        else
+            context.Response.Redirect(context.RedirectUri);
 
-            return Task.CompletedTask;
-        };
-    })
+        return Task.CompletedTask;
+    };
+}
+
+builder.Services.AddIdentityCore<ApplicationUser>(options =>
+{
+});
+
+builder.Services.AddAuthentication(defaultScheme: ProjectConfiguration.AuthCookieName)
+    .AddCookie(ProjectConfiguration.AuthCookieName, ConfigureAuthCookie)
     .AddGitHub(options =>
     {
         options.SignInScheme = ProjectConfiguration.AuthCookieName;
@@ -160,6 +168,10 @@ builder.Services.AddAuthentication(defaultScheme: ProjectConfiguration.AuthCooki
             return Task.CompletedTask;
         };
     });
+
+builder.Services.AddAuthorization(options =>
+{
+});
 
 builder.Services.AddValidatorsFromAssembly(
     typeof(PostingCreateDtoValidator).Assembly,
@@ -178,7 +190,7 @@ builder.Services.AddFluentValidationRulesToSwagger();
 var app = builder.Build();
 
 if (isDevelopment)
-    app.EnsureDatabaseCreated<PostingsDbContext>();
+    app.EnsureDatabaseCreated<DbContext>();
 
 // Configure the HTTP request pipeline.
 if (!isDevelopment)

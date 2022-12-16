@@ -29,8 +29,8 @@ public sealed class Posting : IPostingIdentification
     public ICollection<Picture> Pictures { get; set; }
     
     [Required]
-    public int AuthorId { get; set; }
-    public Author Author { get; set; }
+    public Guid AuthorId { get; set; }
+    public ApplicationUser Author { get; set; }
     
     // It's more memory efficient and faster to query if all of the categories
     // data is stored in a single entity, rather than split across multiple tables.
@@ -134,31 +134,5 @@ public sealed class LocationPostingDetails : ILocationPostingDetails
 // public sealed class ShippingPostingDetails
 // {
 // }
-
-public sealed class PostingsDbContext : DbContext
-{
-    public DbSet<Posting> Postings { get; set; }
-    public DbSet<Author> Authors { get; set; }
-    
-    public PostingsDbContext(DbContextOptions<PostingsDbContext> options)
-        : base(options)
-    {
-    }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        base.OnConfiguring(optionsBuilder);
-    }
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<Posting>()
-            .OwnsOne(p => p.Pricing);
-
-        modelBuilder.Entity<Posting>()
-            .HasMany(p => p.Pictures)
-            .WithOne(p => p.Posting);
-    }
-}
 
 #pragma warning restore 8618 // Disable nullability warnings for EF Core
