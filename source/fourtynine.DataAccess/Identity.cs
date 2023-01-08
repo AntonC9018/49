@@ -45,4 +45,15 @@ public sealed class ApplicationRoleClaim : IdentityRoleClaim<Guid>
 {
 } 
 
+public sealed class ApplicationIdentityRole : IdentityRole<Guid>
+{
+    public ApplicationIdentityRole()
+    {
+    }
+
+    public ApplicationIdentityRole(string roleName) : base(roleName)
+    {
+    }
+}
+
 #pragma warning restore 8618 // Disable nullability warnings for EF Core

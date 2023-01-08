@@ -13,6 +13,7 @@ using fourtynine.Postings;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Unchase.Swashbuckle.AspNetCore.Extensions.Extensions;
@@ -147,9 +148,13 @@ static void ConfigureAuthCookie(CookieAuthenticationOptions options)
     };
 }
 
-builder.Services.AddIdentityCore<ApplicationUser>(options =>
-{
-});
+builder.Services.AddIdentity<ApplicationUser, ApplicationIdentityRole>(options =>
+    {
+        options.Password = null;
+        options.SignIn.RequireConfirmedAccount = true;
+    })
+    .AddEntityFrameworkStores<DbContext>()
+    .AddDefaultTokenProviders();
 
 builder.Services.AddAuthentication(defaultScheme: ProjectConfiguration.AuthCookieName)
     .AddCookie(ProjectConfiguration.AuthCookieName, ConfigureAuthCookie)
