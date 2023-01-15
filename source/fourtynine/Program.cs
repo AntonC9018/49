@@ -1,18 +1,15 @@
 #if !USE_YARP
 using AspNetCore.Proxy;
 #endif
-using System.Data.Common;
-using System.Net;
-using System.Security.Claims;
 using FluentValidation;
 using fourtynine;
+using fourtynine.Authentication;
 using fourtynine.DataAccess;
 using fourtynine.Development;
 using fourtynine.Navbar;
 using fourtynine.Postings;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -127,30 +124,6 @@ else
 
 builder.Services.AddScoped<PostingApiService>();
 
-static void ConfigureAuthCookie(CookieAuthenticationOptions options)
-{
-    options.Cookie.Name = ProjectConfiguration.AuthCookieName;
-    options.Cookie.SameSite = SameSiteMode.Lax;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-    options.Cookie.HttpOnly = true;
-    var expirationTime = TimeSpan.FromDays(200);
-    options.ExpireTimeSpan = expirationTime;
-    // options.Cookie.Expiration = expirationTime; 
-    options.LoginPath = "/Account/Login";
-    options.LogoutPath = "/Account/Logout";
-
-    // Only redirect non-api requests.
-    options.Events.OnRedirectToLogin = context =>
-    {
-        if (context.Request.Path.StartsWithSegments("/api"))
-            context.Response.StatusCode = (int) HttpStatusCode.Unauthorized;
-        else
-            context.Response.Redirect(context.RedirectUri);
-
-        return Task.CompletedTask;
-    };
-}
-
 builder.Services.AddIdentityCore<ApplicationUser>(options =>
     {
         options.Password = null;
@@ -159,32 +132,14 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
     .AddEntityFrameworkStores<DbContext>()
     .AddDefaultTokenProviders();
 
-const string policyScheme = "Policy";
-builder.Services.AddAuthentication(defaultScheme: policyScheme)
-    .AddCookie(ProjectConfiguration.AuthCookieName, ConfigureAuthCookie)
-    .AddGitHub(options =>
-    {
-        options.SignInScheme = ProjectConfiguration.AuthCookieName;
-        options.CallbackPath = "/account/authorize/GitHub";
-        options.ClientId = builder.Configuration["OAuthGithubClientId"];
-        options.ClientSecret = builder.Configuration["OAuthGithubClientSecret"];
+// Will be used by the UI controllers to get the common data, rather than using claims directly,
+// or retrieving this from the database. If the user is logged in, it should be set here.
+builder.Services.AddScoped<IApplicationUserStore, ApplicationUserStore>();
 
-        options.SaveTokens = true;
-        options.Scope.Add("read:user");
-        options.Events.OnCreatingTicket += context =>
-        {
-            context.MaybeAddAccessTokenClaim();
-            return Task.CompletedTask;
-        };
-    })
-    .AddPolicyScheme(policyScheme, displayName: null, options =>
-    {
-        options.ForwardDefaultSelector = context =>
-        {
-            var cookie = context.Request.Cookies[ProjectConfiguration.AuthCookieName];
-            return ProjectConfiguration.AuthCookieName;
-        };
-    });
+{
+    var auth = builder.ConfigureAuthenticationSources();
+    auth.AddGithubAuthentication(builder.Configuration);
+}
 
 builder.Services.AddAuthorization(options =>
 {
@@ -251,10 +206,11 @@ app.UseEndpoints(endpoints =>
         endpoints.MapReverseProxy();
 #endif
     
-    endpoints.MapGet("/Account/Logout", async ctx =>
+    endpoints.MapGet("/Account/Logout", async context =>
     {
-        await ctx.SignOutAsync(
-            ProjectConfiguration.AuthCookieName,
+        var authSchemeUsed = AuthTokenSources.AuthCookieName;
+        await context.SignOutAsync(
+            authSchemeUsed,
             new AuthenticationProperties
             {
                 RedirectUri = "/"

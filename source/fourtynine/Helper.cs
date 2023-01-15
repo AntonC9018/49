@@ -78,6 +78,11 @@ public static class RoutingHelper
         string? page = (string?) view.RouteData.Values["page"];
         return page;
     }
+
+    public static bool IsApi(this PathString path)
+    {
+        return path.StartsWithSegments("/api");
+    }
 }
 
 public sealed class ApiRoute : RouteAttribute
@@ -118,32 +123,3 @@ public sealed class ApiControllerConventionAttribute : Attribute,
 //     {
 //     }
 // } 
-
-public static class ClaimHelper
-{
-    public const string AccessTokenType = "access_token";
-    
-    public static Claim? MaybeAddAccessTokenClaim(this OAuthCreatingTicketContext context)
-    {
-        if (context.Identity is null)
-            return null;
-        
-        var accessToken = context.AccessToken;
-        if (accessToken is null)
-            return null;
-        
-        var claim = new Claim(AccessTokenType, accessToken);
-        context.Identity.AddClaim(claim);
-        return claim;
-    }
-    
-    public static string? GetAccessToken(this ClaimsPrincipal principal)
-    {
-        return principal.FindFirstValue(AccessTokenType);
-    }
-    
-    public static bool IsAccessToken(this Claim claim)
-    {
-        return claim.Type == AccessTokenType;
-    }
-}

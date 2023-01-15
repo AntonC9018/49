@@ -40,6 +40,14 @@ public sealed class DbContext : IdentityDbContext<
             .HasMany(u => u.Postings)
             .WithOne(p => p.Author)
             .HasForeignKey(p => p.AuthorId);
+        
+        modelBuilder.Entity<ApplicationUser>()
+            .HasMany(u => u.AllowedAuthenticationSchemes)
+            .WithOne()
+            .HasForeignKey(s => s.UserId);
+        
+        modelBuilder.Entity<AllowedAuthenticationScheme>()
+            .HasKey(s => new { s.UserId, s.SchemeName });
     }
 }
 

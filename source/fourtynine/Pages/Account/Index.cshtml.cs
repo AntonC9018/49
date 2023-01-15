@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+﻿using fourtynine.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Octokit;

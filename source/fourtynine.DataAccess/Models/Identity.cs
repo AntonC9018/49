@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
 
 namespace fourtynine.DataAccess;
@@ -11,7 +13,19 @@ namespace fourtynine.DataAccess;
 
 public sealed class ApplicationUser : IdentityUser<Guid>
 {
+    public ICollection<AllowedAuthenticationScheme> AllowedAuthenticationSchemes { get; set; }
     public ICollection<Posting> Postings { get; set; }
+}
+
+// NOTE: Might want to leave this inheritable for the different authentication providers.
+public class AllowedAuthenticationScheme
+{
+    public Guid UserId { get; set; }
+
+    [MaxLength(50)]
+    public string SchemeName { get; set; }
+    
+    public long ProviderUserId { get; set; }
 }
 
 public sealed class ApplicationRole : IdentityRole<Guid>

@@ -1,4 +1,5 @@
 ﻿using System;
+using JetBrains.Annotations;
 using Nuke.Common;
 using Nuke.Common.Tooling;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
@@ -53,6 +54,8 @@ partial class Build
             var args = GetEntityFrameworkArguments(args =>
             {
                 args.Add("database update");
+                if (MigrationName is not null)
+                    args.Add(MigrationName);
             });
             DotNet(args.RenderForExecution());
         });

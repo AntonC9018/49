@@ -21,7 +21,4 @@ public static class ProjectConfiguration
     /// so one more piece of configuration that would have to be shared / duplicated.
     /// </summary>
     public const string StaticFilesRoute = "/";
-    
-    
-    public const string AuthCookieName = "CookieAuth";
 }
