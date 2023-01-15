@@ -82,6 +82,7 @@
               "GenerateSSLKeysDevelopment",
               "GenerateSwaggerTypeScriptClient",
               "Publish",
+              "RemoveMigration",
               "Restore",
               "StartDev",
               "UpdateDatabase"
@@ -104,6 +105,7 @@
               "GenerateSSLKeysDevelopment",
               "GenerateSwaggerTypeScriptClient",
               "Publish",
+              "RemoveMigration",
               "Restore",
               "StartDev",
               "UpdateDatabase"

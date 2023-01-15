@@ -36,6 +36,16 @@ partial class Build
             });
             DotNet(args.RenderForExecution());
         });
+        
+    Target RemoveMigration => _ => _
+        .Executes(() =>
+        {
+            var args = GetEntityFrameworkArguments(args =>
+            {
+                args.Add("migrations remove");
+            });
+            DotNet(args.RenderForExecution());
+        });
     
     Target UpdateDatabase => _ => _
         .Executes(() =>

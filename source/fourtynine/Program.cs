@@ -133,9 +133,12 @@ static void ConfigureAuthCookie(CookieAuthenticationOptions options)
     options.Cookie.SameSite = SameSiteMode.Lax;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     options.Cookie.HttpOnly = true;
+    var expirationTime = TimeSpan.FromDays(200);
+    options.ExpireTimeSpan = expirationTime;
+    // options.Cookie.Expiration = expirationTime; 
     options.LoginPath = "/Account/Login";
     options.LogoutPath = "/Account/Logout";
-        
+
     // Only redirect non-api requests.
     options.Events.OnRedirectToLogin = context =>
     {
@@ -148,7 +151,7 @@ static void ConfigureAuthCookie(CookieAuthenticationOptions options)
     };
 }
 
-builder.Services.AddIdentity<ApplicationUser, ApplicationIdentityRole>(options =>
+builder.Services.AddIdentityCore<ApplicationUser>(options =>
     {
         options.Password = null;
         options.SignIn.RequireConfirmedAccount = true;
@@ -156,7 +159,8 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationIdentityRole>(options =
     .AddEntityFrameworkStores<DbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddAuthentication(defaultScheme: ProjectConfiguration.AuthCookieName)
+const string policyScheme = "Policy";
+builder.Services.AddAuthentication(defaultScheme: policyScheme)
     .AddCookie(ProjectConfiguration.AuthCookieName, ConfigureAuthCookie)
     .AddGitHub(options =>
     {
@@ -171,6 +175,14 @@ builder.Services.AddAuthentication(defaultScheme: ProjectConfiguration.AuthCooki
         {
             context.MaybeAddAccessTokenClaim();
             return Task.CompletedTask;
+        };
+    })
+    .AddPolicyScheme(policyScheme, displayName: null, options =>
+    {
+        options.ForwardDefaultSelector = context =>
+        {
+            var cookie = context.Request.Cookies[ProjectConfiguration.AuthCookieName];
+            return ProjectConfiguration.AuthCookieName;
         };
     });
 

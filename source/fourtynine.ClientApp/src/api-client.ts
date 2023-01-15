@@ -472,7 +472,7 @@ export interface IPostingCreate {
 export class PostingDetails implements IPostingDetails {
     Pricing?: PricingPostingDetails;
     Location?: LocationPostingDetails;
-    Kind?: PostingKind;
+    Kind!: PostingKind;
     RealEstate?: RealEstatePostingDetails;
     Vehicle?: VehiclePostingDetails;
 
@@ -516,7 +516,7 @@ export class PostingDetails implements IPostingDetails {
 export interface IPostingDetails {
     Pricing?: PricingPostingDetails;
     Location?: LocationPostingDetails;
-    Kind?: PostingKind;
+    Kind: PostingKind;
     RealEstate?: RealEstatePostingDetails;
     Vehicle?: VehiclePostingDetails;
 }
