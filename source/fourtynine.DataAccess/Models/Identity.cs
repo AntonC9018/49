@@ -25,7 +25,8 @@ public class AllowedAuthenticationScheme
     [MaxLength(50)]
     public string SchemeName { get; set; }
     
-    public long ProviderUserId { get; set; }
+    [MaxLength(50)]
+    public string ProviderUserId { get; set; }
 }
 
 public sealed class ApplicationRole : IdentityRole<Guid>

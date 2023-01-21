@@ -1,6 +1,7 @@
 #if !USE_YARP
 using AspNetCore.Proxy;
 #endif
+using AspNet.Security.OAuth.GitHub;
 using FluentValidation;
 using fourtynine;
 using fourtynine.Authentication;
@@ -10,11 +11,13 @@ using fourtynine.Navbar;
 using fourtynine.Postings;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Unchase.Swashbuckle.AspNetCore.Extensions.Extensions;
 using DbContext = fourtynine.DataAccess.DbContext;
+// ReSharper disable VariableHidesOuterVariable
 
 var builder = WebApplication.CreateBuilder(args);
 bool isDevelopment = builder.Environment.IsDevelopment();
@@ -135,10 +138,18 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
 // Will be used by the UI controllers to get the common data, rather than using claims directly,
 // or retrieving this from the database. If the user is logged in, it should be set here.
 builder.Services.AddScoped<IApplicationUserStore, ApplicationUserStore>();
-
 {
     var auth = builder.ConfigureAuthenticationSources();
     auth.AddGithubAuthentication(builder.Configuration);
+    auth.AddGoogleAuthentication(builder.Configuration);
+
+    builder.Services.AddKeyed<IUserEmailConfirmationProvider>(options =>
+    {
+        options.Add<GithubEmailConfirmationProvider>(
+            GitHubAuthenticationDefaults.AuthenticationScheme, ServiceLifetime.Singleton);
+        options.Add<GoogleEmailConfirmationProvider>(
+            GoogleDefaults.AuthenticationScheme, ServiceLifetime.Singleton);
+    });
 }
 
 builder.Services.AddAuthorization(options =>

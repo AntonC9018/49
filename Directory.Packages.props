@@ -3,6 +3,8 @@
     <EF_ASP_VERSION>6.0.12</EF_ASP_VERSION>
   </PropertyGroup>
   <ItemGroup Label="Entity Framework and Authentication">
+    <PackageVersion Include="Autofac" Version="6.5.0" />
+    <PackageVersion Include="Autofac.Extensions.DependencyInjection" Version="8.0.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="$(EF_ASP_VERSION)" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="$(EF_ASP_VERSION)" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="$(EF_ASP_VERSION)" />
@@ -12,7 +14,6 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="$(EF_ASP_VERSION)" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="$(EF_ASP_VERSION)" />
   </ItemGroup>
-  
   <PropertyGroup>
     <FLUENT_VALIDATION_VERSION>11.4.0</FLUENT_VALIDATION_VERSION>
   </PropertyGroup>
@@ -22,7 +23,6 @@
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="$(FLUENT_VALIDATION_VERSION)" />
     <PackageVersion Include="MicroElements.Swashbuckle.FluentValidation" Version="5.7.0" />
   </ItemGroup>
-  
   <PropertyGroup>
     <AUTOMAPPER_VERSION>12.0.0</AUTOMAPPER_VERSION>
   </PropertyGroup>
@@ -30,20 +30,18 @@
     <PackageVersion Include="AutoMapper" Version="$(AUTOMAPPER_VERSION)" />
     <PackageVersion Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="$(AUTOMAPPER_VERSION)" />
   </ItemGroup>
-  
   <ItemGroup Label="Stuff">
     <PackageVersion Include="AspNet.Security.OAuth.GitHub" Version="6.0.14" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.Google" Version="6.0.13" />
     <PackageVersion Include="OctoKit" Version="4.0.3" />
     <PackageVersion Include="Microsoft.FeatureManagement.AspNetCore" Version="3.0.0-preview" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     <PackageVersion Include="LinqKit" Version="1.2.3" />
     <PackageVersion Include="Unchase.Swashbuckle.AspNetCore.Extensions" Version="2.6.12" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.Web" Version="6.0.5" />
-    
     <PackageVersion Include="AspNetCore.Proxy" Version="4.4.0" />
     <PackageVersion Include="Yarp.ReverseProxy" Version="1.1.1" />
   </ItemGroup>
-  
   <ItemGroup Label="Unit Testing">
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
     <PackageVersion Include="xunit" Version="2.4.2" />

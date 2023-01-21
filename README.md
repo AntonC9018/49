@@ -7,8 +7,11 @@
 4. Run the build script in the root folder, which will install [Nuke](https://nuke.build/) and try to do a build.
 5. You need to set all secrets using `dotnet user-secrets` for in the folder `source/fourtynine` (see notes on why this is not shared automatically in the notes below):
   ```
-  dotnet user-secrets OAuthGithubClientId <github client id>
-  dotnet user-secrets OAuthGithubClientSecret <github client secret>
+  dotnet user-secrets set OAuthGithubClientId <github client id>
+  dotnet user-secrets set OAuthGithubClientSecret <github client secret>
+  
+  dotnet user-secrets set OAuthGoogleClientId <google client id>
+  dotnet user-secrets set OAuthGoogleClientSecret <google client secret>
   ```
 
 To build for production, do `build publish` (or `nuke publish`, which calls the same nuke target).
