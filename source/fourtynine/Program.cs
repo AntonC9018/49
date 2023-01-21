@@ -143,7 +143,7 @@ builder.Services.AddScoped<IApplicationUserStore, ApplicationUserStore>();
     auth.AddGithubAuthentication(builder.Configuration);
     auth.AddGoogleAuthentication(builder.Configuration);
 
-    builder.Services.AddKeyed<IUserEmailConfirmationProvider>(options =>
+    builder.AddKeyed<IUserEmailConfirmationProvider>(options =>
     {
         options.Add<GithubEmailConfirmationProvider>(
             GitHubAuthenticationDefaults.AuthenticationScheme, ServiceLifetime.Singleton);

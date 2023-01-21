@@ -9,38 +9,52 @@ public sealed class KeyedProviderConfiguration<TBaseType> where TBaseType : clas
 
 public sealed class KeyedProviderConfigurationBuilder<TBaseType> where TBaseType : class
 {
-    public List<(string, System.Type, ServiceLifetime)> Mappings { get; } = new();
+    private readonly KeyedProviderConfiguration<TBaseType> _configuration;
+    private readonly IServiceCollection _services;
+
+    public KeyedProviderConfigurationBuilder(KeyedProviderConfiguration<TBaseType> configuration, IServiceCollection services)
+    {
+        _configuration = configuration;
+        _services = services;
+    }
+
     public KeyedProviderConfigurationBuilder<TBaseType> Add<T>(string key, ServiceLifetime lifetime = ServiceLifetime.Scoped) where T : class, TBaseType
     {
-        Mappings.Add((key, typeof(T), lifetime));
+        _configuration.Mappings.Add(key, typeof(T));
+        _services.Add(new ServiceDescriptor(typeof(T), typeof(T), lifetime));
+        _services.Add(new ServiceDescriptor(typeof(TBaseType), typeof(T), lifetime));
         return this;
     }
 }
 
 public static class KeyedProviderExtensions
 {
-    public static void AddKeyed<TBaseType>(
-        this IServiceCollection services, Action<KeyedProviderConfigurationBuilder<TBaseType>> configure)
+    public static KeyedProviderConfigurationBuilder<TBaseType> AddKeyed<TBaseType>(
+        this WebApplicationBuilder builder, Action<KeyedProviderConfigurationBuilder<TBaseType>>? configure = null)
         where TBaseType : class
     {
+        var services = builder.Services; 
         if (services.All(s => s.ServiceType != typeof(IKeyedProvider<TBaseType>)))
             services.AddSingleton<IKeyedProvider<TBaseType>, KeyedProvider<TBaseType>>();
 
-        var builder = new KeyedProviderConfigurationBuilder<TBaseType>();
-        configure(builder);
-
-        foreach (var (_, type, lifetime) in builder.Mappings)
+        var key = typeof(TBaseType).FullName + "_KeyedConfig";
+        KeyedProviderConfiguration<TBaseType> config;
+        var properties = builder.Host.Properties;
+        if (properties.TryGetValue(key, out var config0))
         {
-            services.Add(new ServiceDescriptor(type, type, lifetime));
-            services.Add(new ServiceDescriptor(typeof(TBaseType), type, lifetime));
+            config = (KeyedProviderConfiguration<TBaseType>) config0;
+        }
+        else
+        {
+            config = new KeyedProviderConfiguration<TBaseType>();
+            properties.Add(key, config);
+            
+            services.AddSingleton(config);
         }
         
-        var optionsBuilder = services.AddOptions<KeyedProviderConfiguration<TBaseType>>();
-        optionsBuilder.Configure(o =>
-        {
-            foreach (var (key, type, _) in builder.Mappings)
-                o.Mappings.Add(key, type);
-        });
+        var builder1 = new KeyedProviderConfigurationBuilder<TBaseType>(config, services);
+        configure?.Invoke(builder1);
+        return builder1;
     }
 
     public static TBaseType? GetKeyedService<TBaseType>(this IServiceProvider serviceProvider, string key) where TBaseType : class
@@ -74,9 +88,9 @@ public sealed class KeyedProvider<TBaseType> : IKeyedProvider<TBaseType>
     private readonly KeyedProviderConfiguration<TBaseType> _mappings;
     private readonly IServiceProvider _serviceProvider;
     
-    public KeyedProvider(IOptions<KeyedProviderConfiguration<TBaseType>> mappings, IServiceProvider serviceProvider)
+    public KeyedProvider(KeyedProviderConfiguration<TBaseType> mappings, IServiceProvider serviceProvider)
     {
-        _mappings = mappings.Value;
+        _mappings = mappings;
         _serviceProvider = serviceProvider;
     }
 
