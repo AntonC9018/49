@@ -3,8 +3,6 @@
     <EF_ASP_VERSION>6.0.12</EF_ASP_VERSION>
   </PropertyGroup>
   <ItemGroup Label="Entity Framework and Authentication">
-    <PackageVersion Include="Autofac" Version="6.5.0" />
-    <PackageVersion Include="Autofac.Extensions.DependencyInjection" Version="8.0.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="$(EF_ASP_VERSION)" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="$(EF_ASP_VERSION)" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="$(EF_ASP_VERSION)" />
@@ -41,6 +39,8 @@
     <PackageVersion Include="Microsoft.AspNetCore.Components.Web" Version="6.0.5" />
     <PackageVersion Include="AspNetCore.Proxy" Version="4.4.0" />
     <PackageVersion Include="Yarp.ReverseProxy" Version="1.1.1" />
+    <PackageVersion Include="Autofac" Version="6.5.0" />
+    <PackageVersion Include="Autofac.Extensions.DependencyInjection" Version="8.0.0" />
   </ItemGroup>
   <ItemGroup Label="Unit Testing">
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
