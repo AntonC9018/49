@@ -151,7 +151,7 @@ public class PostingController : Controller
         PostingCreateDto postingDto, 
         [FromServices] IValidator<PostingCreateDto> validator)
     {
-        _logger.LogInformation("Creating posting {title}", postingDto.Title);
+        _logger.LogInformation("Creating posting {Title}", postingDto.Title);
 
         var validationResult = await validator.ValidateAsync(postingDto);
         if (!validationResult.IsValid)
@@ -163,5 +163,4 @@ public class PostingController : Controller
         
         return CreatedAtAction(nameof(GetDetailed), new { id = posting.Id }, dto);
     }
-    
 }
