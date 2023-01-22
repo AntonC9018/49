@@ -20,7 +20,7 @@
     <PackageVersion Include="FluentValidation" Version="$(FLUENT_VALIDATION_VERSION)" />
     <PackageVersion Include="FluentValidation.AspNetCore" Version="11.2.2" />
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="$(FLUENT_VALIDATION_VERSION)" />
-    <PackageVersion Include="MicroElements.Swashbuckle.FluentValidation" Version="5.7.0" />
+    <PackageVersion Include="MicroElements.Swashbuckle.FluentValidation" Version="6.0.0-beta.1" />
   </ItemGroup>
   <PropertyGroup>
     <AUTOMAPPER_VERSION>12.0.0</AUTOMAPPER_VERSION>

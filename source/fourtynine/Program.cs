@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.OpenApi.Models;
 using Unchase.Swashbuckle.AspNetCore.Extensions.Extensions;
 using DbContext = fourtynine.DataAccess.DbContext;
@@ -142,7 +143,7 @@ builder.Services.AddScoped<UserProviderService>();
     auth.AddGithubAuthentication(builder.Configuration);
     auth.AddGoogleAuthentication(builder.Configuration);
 
-    builder.AddKeyed<IUserEmailConfirmationProvider>(options =>
+    builder.Services.AddKeyed<IUserEmailConfirmationProvider>(options =>
     {
         options.Add<GithubEmailConfirmationProvider>(
             GitHubAuthenticationDefaults.AuthenticationScheme, ServiceLifetime.Singleton);
@@ -180,6 +181,8 @@ builder.Services.Configure<SendGridEmailSenderOptions>(o =>
     o.SenderEmail = builder.Configuration["SendGridSenderEmail"];
     o.SenderName = builder.Configuration["SendGridSenderName"];
 });
+
+builder.Services.AddHttpContextAccessor();
 
 
 var app = builder.Build();

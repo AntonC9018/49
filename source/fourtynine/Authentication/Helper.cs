@@ -1,6 +1,8 @@
-﻿using System.Security.Claims;
+﻿using System.Diagnostics;
+using System.Security.Claims;
 using fourtynine.DataAccess;
 using Microsoft.AspNetCore.Authentication.OAuth;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using DbContext = fourtynine.DataAccess.DbContext;
 
@@ -89,14 +91,18 @@ public static class AuthenticationSomething
                         ProviderUserId = providerUserId,
                     },
                 },
+                SecurityStamp = Guid.NewGuid().ToString(),
             };
             if (emailConfirmation is not null)
                 user.EmailConfirmed = await emailConfirmation.GetEmailConfirmedAsync(user, context.Principal!);
 
             if (user.Id == default)
             {
-                dbContext.Users.Add(user);
-                await dbContext.SaveChangesAsync();
+                var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+                var result = await userManager.CreateAsync(user);
+                Debug.Assert(user.Id != default);
+                if (!result.Succeeded)
+                    throw new Exception("Failed to create user");
             }
         }
         

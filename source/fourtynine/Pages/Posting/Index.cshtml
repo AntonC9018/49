@@ -4,96 +4,101 @@
 
 @{
     var posting = Model.Posting;
-    ViewData["Title"] = posting.General.Title;
+    ViewData["Title"] = posting?.General.Title ?? "Posting not found";
 }
 
 <script type="module">
-window.history.replaceState(null, "", @(Model.NewUrl));
+window.history.replaceState(null, "", "@(Model.NewUrl)");
 </script>
 
 <div>
+    @if (posting is null)
+    {
+        <p>Posting with the requested id <b>@Model.PostingId</b> has not been found.</p>
+        return;
+    }
     @* A rudimentary form for now, should be enhanced. *@
     @{{
-        var general = posting.General;
-        <h2>Title: @(general.Title)</h2>
-        <p>Description: @(general.Description)</p>
-        <img src="@(general.ThumbnailUrl)" alt="@(general.Title)"/>
-        <p>Date: @(general.DatePosted)</p>
-    }}
-    
+          var general = posting.General;
+          <h2>Title: @(general.Title)</h2>
+          <p>Description: @(general.Description)</p>
+          <img src="@(general.ThumbnailUrl)" alt="@(general.Title)"/>
+          <p>Date: @(general.DatePosted)</p>
+      }}
+
     @{
         var details = posting.Details;
     }
-    
+
     @{{
-        var pricing = details.Pricing;
-        if (pricing is not null)
-        {
-            <h3>Pricing</h3>
-            var priceRange = pricing.GetPriceRange();
-            
-            if (priceRange is not null)
-            {
-                <p>Price: @(priceRange.Value.Min)-@(priceRange.Value.Max)</p>
-            }
-            else if (pricing.Price is not null)
-            {
-                <p>Price: @(pricing.Price.Value)</p>
-            }
-            else
-            {
-                <p>Negotiable Price</p>
-            }
-            
-            <p>Bargain kind: @(pricing.BargainKinds.ToString())</p>
-        }
-    }}
-    
+          var pricing = details.Pricing;
+          if (pricing is not null)
+          {
+              <h3>Pricing</h3>
+              var priceRange = pricing.GetPriceRange();
+
+              if (priceRange is not null)
+              {
+                  <p>Price: @(priceRange.Value.Min)-@(priceRange.Value.Max)</p>
+              }
+              else if (pricing.Price is not null)
+              {
+                  <p>Price: @(pricing.Price.Value)</p>
+              }
+              else
+              {
+                  <p>Negotiable Price</p>
+              }
+
+              <p>Bargain kind: @(pricing.BargainKinds.ToString())</p>
+          }
+      }}
+
     @{{
-        var location = details.Location;
-        if (location is not null)
-        {
-            <h3>Location</h3>
-            var coordinates = location.GetCoordinates();
-            if (coordinates is not null)
-            {
-                <p>Latitude: @(coordinates.Value.Latitude)</p>
-                <p>Longitude: @(coordinates.Value.Longitude)</p>
-            }
-            
-            <p>Country: @(location.Country)</p>
-            if (location.City is not null)
-            {
-                <p>City: @(location.City)</p>
-                if (location.Address is not null)
-                {
-                    <p>location.Address</p>
-                }
-            }
-        }
-    }}
-    
+          var location = details.Location;
+          if (location is not null)
+          {
+              <h3>Location</h3>
+              var coordinates = location.GetCoordinates();
+              if (coordinates is not null)
+              {
+                  <p>Latitude: @(coordinates.Value.Latitude)</p>
+                  <p>Longitude: @(coordinates.Value.Longitude)</p>
+              }
+
+              <p>Country: @(location.Country)</p>
+              if (location.City is not null)
+              {
+                  <p>City: @(location.City)</p>
+                  if (location.Address is not null)
+                  {
+                      <p>location.Address</p>
+                  }
+              }
+          }
+      }}
+
     @{{
-        var realEstate = details.RealEstate;
-        if (realEstate is not null)
-        {
-            <h3>Real Estate</h3>
-            <p>Address: @(realEstate.Area)</p>
-            <p>Kind: @(realEstate.Kind)</p>
-            <p>Number of rooms: @(realEstate.Rooms)</p>
-            <p>Space Purpose: @(realEstate.SpacePurpose)</p>
-        }
-    }}
-    
+          var realEstate = details.RealEstate;
+          if (realEstate is not null)
+          {
+              <h3>Real Estate</h3>
+              <p>Address: @(realEstate.Area)</p>
+              <p>Kind: @(realEstate.Kind)</p>
+              <p>Number of rooms: @(realEstate.Rooms)</p>
+              <p>Space Purpose: @(realEstate.SpacePurpose)</p>
+          }
+      }}
+
     @{{
-        var vehicle = details.Vehicle;
-        if (vehicle is not null)
-        {
-            <h3>Vehicle</h3>
-            <p>Year: @(vehicle.Year)</p>
-            <p>Model: @(vehicle.Model)</p>
-            <p>Manufacturer: @(vehicle.Manufacturer)</p>
-        }
-    }}
-    
+          var vehicle = details.Vehicle;
+          if (vehicle is not null)
+          {
+              <h3>Vehicle</h3>
+              <p>Year: @(vehicle.Year)</p>
+              <p>Model: @(vehicle.Model)</p>
+              <p>Manufacturer: @(vehicle.Manufacturer)</p>
+          }
+      }}
+
 </div>

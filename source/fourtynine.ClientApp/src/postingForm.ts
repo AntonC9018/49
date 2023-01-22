@@ -100,7 +100,7 @@ function initializePostingForm()
         try
         {
             const response = await client.postingPOST(dto);
-            window.location.assign(`/Postings/${response.General.Id}/${response.General.Slug}`);
+            window.location.assign(`/Posting/${response.General.Id}/${response.General.Slug}`);
         }
         catch (e: any)
         {            

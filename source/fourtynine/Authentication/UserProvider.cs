@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using fourtynine.DataAccess;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using DbContext = fourtynine.DataAccess.DbContext;
 
@@ -13,10 +14,10 @@ public class UserProviderService
     private bool _isUserCached;
     private ApplicationUser? _cachedUser; 
 
-    public UserProviderService(DbContext dbContext, HttpContext httpContext)
+    public UserProviderService(DbContext dbContext, IHttpContextAccessor httpContextAccessor)
     {
         DbContext = dbContext;
-        HttpContext = httpContext;
+        HttpContext = httpContextAccessor.HttpContext!;
     }
     
     public IQueryable<ApplicationUser> QueryUser()
@@ -42,6 +43,15 @@ public class UserProviderService
         if (user is null)
             throw new InvalidOperationException("User is not authenticated");
         return user;
+    }
+
+    public Task<List<AllowedAuthenticationScheme>> GetAllowedAuthenticationSchemes()
+    {
+        return QueryUser()
+            .OrderBy(x => x.Id)
+            .Take(1)
+            .SelectMany(x => x.AllowedAuthenticationSchemes)
+            .ToListAsync();
     }
     
     public Guid UserId => HttpContext.User.GetId();

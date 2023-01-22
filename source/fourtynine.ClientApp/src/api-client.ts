@@ -112,7 +112,7 @@ export class Client {
     /**
      * @return Success
      */
-    detailed(id: number): Promise<PostingGetDetailed> {
+    getDetailed(id: number): Promise<PostingGetDetailed> {
         let url_ = this.baseUrl + "/api/Posting/detailed/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -127,11 +127,11 @@ export class Client {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processDetailed(_response);
+            return this.processGetDetailed(_response);
         });
     }
 
-    protected processDetailed(response: Response): Promise<PostingGetDetailed> {
+    protected processGetDetailed(response: Response): Promise<PostingGetDetailed> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
@@ -265,6 +265,84 @@ export class Client {
         }
         return Promise.resolve<PostingGetDetailed>(null as any);
     }
+
+    /**
+     * @return Success
+     */
+    refreshValidity(): Promise<boolean> {
+        let url_ = this.baseUrl + "/api/User/email/refresh-validity";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "PATCH",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processRefreshValidity(_response);
+        });
+    }
+
+    protected processRefreshValidity(response: Response): Promise<boolean> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : <any>null;
+    
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<boolean>(null as any);
+    }
+
+    /**
+     * @return Success
+     */
+    sendValidation(): Promise<void> {
+        let url_ = this.baseUrl + "/api/User/email/send-validation";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "POST",
+            headers: {
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processSendValidation(_response);
+        });
+    }
+
+    protected processSendValidation(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
 }
 
 /** 1 = Offer 2 = Request 4 = Permanent 5 = Sell 6 = Buy 8 = Temporary 9 = Rent 10 = Lease 13 = SaleOrRent 14 = BuyOrLease 15 = All */
@@ -375,7 +453,7 @@ export interface ILocationPostingDetails {
 }
 
 export class PostingAuthorGet implements IPostingAuthorGet {
-    Id!: number;
+    Id!: string;
     Name!: string;
     Email!: string;
 
@@ -413,7 +491,7 @@ export class PostingAuthorGet implements IPostingAuthorGet {
 }
 
 export interface IPostingAuthorGet {
-    Id: number;
+    Id: string;
     Name: string;
     Email: string;
 }

@@ -126,7 +126,7 @@ public class PostingController : Controller
         return posting;
     }
     
-    [HttpGet("detailed/{id:long}")]
+    [HttpGet("detailed/{id:long}", Name = nameof(GetDetailed))]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<PostingGetDto_Detailed>> GetDetailed(int id)

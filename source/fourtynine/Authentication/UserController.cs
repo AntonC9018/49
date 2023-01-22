@@ -1,7 +1,6 @@
 ﻿using fourtynine.DataAccess;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using SendGrid.Helpers.Mail;
 using DbContext = fourtynine.DataAccess.DbContext;
@@ -25,11 +24,42 @@ public class UserController : Controller
     [HttpPatch("email/refresh-validity")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<bool>> RefreshEmailValidity(
-        [FromServices] IUserEmailConfirmationProvider emailConfirmationProvider)
+        [FromQuery] string? scheme,
+        [FromServices] IKeyedProvider<IUserEmailConfirmationProvider> emailConfirmationProvider)
     {
         var user = await _userProvider.GetAuthenticatedUser();
-        bool newValue = await emailConfirmationProvider.GetEmailConfirmedAsync(user, HttpContext.User);
-        if (user.EmailConfirmed != newValue)
+        if (user.EmailConfirmed)
+            return Ok(true);
+
+        bool newValue = false;
+        if (scheme is null)
+        {
+            var authenticationSchemes = await _userProvider.GetAllowedAuthenticationSchemes();
+            var tasks = authenticationSchemes
+                .Select(s => emailConfirmationProvider.Get(s.SchemeName))
+                .Where(p => p is not null)
+                .Select(p => p!.GetEmailConfirmedAsync(user, User))
+                .ToList();
+
+            while (tasks.Count > 0)
+            {
+                var task = await Task.WhenAny(tasks);
+                tasks.Remove(task);
+                if (task.Result == true)
+                {
+                    newValue = true;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            var provider = emailConfirmationProvider.Get(scheme);
+            if (provider is not null)
+                newValue = await provider.GetEmailConfirmedAsync(user, User);
+        }
+        
+        if (newValue == true)
         {
             user.EmailConfirmed = newValue;
             await _dbContext.SaveChangesAsync();
@@ -44,22 +74,24 @@ public class UserController : Controller
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> SendEmailValidationMessage(
         [FromServices] UserManager<ApplicationUser> userManager,
-        [FromServices] ISendGridEmailSender email)
+        [FromServices] ISendGridEmailSender email,
+        [FromServices] LinkGenerator linkGenerator)
     {
         var user = await _userProvider.GetAuthenticatedUser();
 
         if (user.EmailConfirmed)
             return BadRequest("Email already confirmed.");
         
-        var token = userManager.GenerateEmailConfirmationTokenAsync(user);
-        var callbackUrl = Url.Page("Account/ConfirmEmail", 
-            new { userId = user.Id, code = token });
+        var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+        var callbackUrl = linkGenerator.GetUriByPage(HttpContext, 
+            page: "/Account/ConfirmEmail", 
+            values: new { userId = user.Id, code = token });
 
         var message = new SendGridMessage
         {
             Subject = "Email confirmation",
-            PlainTextContent = @"<p>Please confirm your account by clicking this link: <a href=" + callbackUrl +
-                               ">link</a></p>",
+            HtmlContent = $"<p>Please confirm your account by clicking this <a href={callbackUrl}>link</a></p>",
+            PlainTextContent = $"Please confirm your account by clicking this link: {callbackUrl}",
         };
         message.AddTo(user.Email);
         var response = await email.SendEmailAsync(message);

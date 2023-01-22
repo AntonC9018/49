@@ -1,10 +1,8 @@
-﻿using fourtynine.Authentication;
-using fourtynine.DataAccess;
-using Microsoft.AspNetCore.Authorization;
+﻿using fourtynine.DataAccess;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using DbContext = fourtynine.DataAccess.DbContext;
+using SendGrid.Helpers.Mail;
 
 namespace fourtynine.Pages.Account;
 
@@ -22,7 +20,9 @@ public class ConfirmEmail : PageModel
         
 
     public async Task<IActionResult> OnGet(
-        [FromQuery] string? code, [FromQuery] string? userId)
+        [FromQuery] string? code,
+        [FromQuery] string? userId,
+        [FromServices] ISendGridEmailSender emailSender)
     {
         if (code is null || userId is null)
             return NotFound();
@@ -30,18 +30,33 @@ public class ConfirmEmail : PageModel
         if (!Guid.TryParse(userId, out var providedGuid))
             return BadRequest("Invalid user id");
         
-        var id = HttpContext.GetUserId();
-        
         // Is this check required?
-        if (id != providedGuid)
+        #if false
+        var loggedInUserId = User.GetId();
+        if (loggedInUserId != providedGuid)
         {
-            // return BadRequest("The user id has to match");
+            return BadRequest("The user id has to match");
         }
+        #endif
 
         // It takes the user id as a string? this is bad design imo.
         // It should be a generic extension method and take the right type as the id.
         ApplicationUser = await _userManager.FindByIdAsync(userId);
+        if (ApplicationUser.EmailConfirmed)
+            return Page();
+        
         EmailValidationResult = await _userManager.ConfirmEmailAsync(ApplicationUser, code);
+
+        if (EmailValidationResult.Succeeded)
+        {
+            var message = new SendGridMessage
+            {
+                PlainTextContent = "Your email has been confirmed",
+                Subject = "Email confirmed",
+            };
+            message.AddTo(ApplicationUser.Email);
+            await emailSender.SendEmailAsync(message);
+        }
         
         return Page();
     }
