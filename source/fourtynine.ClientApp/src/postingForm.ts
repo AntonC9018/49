@@ -58,6 +58,8 @@ function initializePostingForm()
     const client = new Client();
     form.addEventListener("submit", async function (event)
     {
+        console.log("Submitting form...");
+        
         event.preventDefault();
         const form = event.target as HTMLFormElement;
         const formData = new FormData(form);
@@ -85,11 +87,12 @@ function initializePostingForm()
             
             // Only leave the relevant discriminated union bit.
             const selectedKind = +kindDropdown.value;
+            console.log(postingDetailsDivs)
             for (let i = 0; i < postingDetailsDivs.length; i++)
             {
                 if (selectedKind === i)
                     continue;
-                const key = PostingKind[selectedKind];
+                const key = PostingKind[i];
                 delete (<any> dto.Details)[key];
             }
         }

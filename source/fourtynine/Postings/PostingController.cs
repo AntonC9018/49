@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using FluentValidation;
+using fourtynine.Authentication;
 using fourtynine.DataAccess;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -157,7 +158,13 @@ public class PostingController : Controller
         if (!validationResult.IsValid)
             return BadRequest(validationResult.Errors);
         
-        var posting = await _api.Create(postingDto);
+        var posting = _api.Mapper.Map<Posting>(postingDto);
+        posting.AuthorId = User.GetId();
+        posting.DatePosted = DateTime.Now;
+
+        _api.DbContext.Postings.Add(posting);
+        await _api.DbContext.SaveChangesAsync();
+
         var dto = _api.Mapper.Map<PostingGetDto_Detailed>(posting);
         dto.General.InitializeSlug();
         

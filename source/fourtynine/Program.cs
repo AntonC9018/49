@@ -13,6 +13,7 @@ using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Unchase.Swashbuckle.AspNetCore.Extensions.Extensions;
@@ -135,9 +136,7 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
     .AddEntityFrameworkStores<DbContext>()
     .AddDefaultTokenProviders();
 
-// Will be used by the UI controllers to get the common data, rather than using claims directly,
-// or retrieving this from the database. If the user is logged in, it should be set here.
-builder.Services.AddScoped<IApplicationUserStore, ApplicationUserStore>();
+builder.Services.AddScoped<UserProviderService>();
 {
     var auth = builder.ConfigureAuthenticationSources();
     auth.AddGithubAuthentication(builder.Configuration);
@@ -169,6 +168,19 @@ builder.Services.AddFluentValidationRulesToSwagger();
 // library to do said validation on the server.
 // https://github.com/sinanbozkus/FormHelper
 // builder.Services.AddFluentValidationClientsideAdapters();
+
+// register send grid email service
+builder.Services.AddSingleton<SendGridEmailSender>();
+builder.Services.AddSingleton<IEmailSender>(sp => sp.GetRequiredService<SendGridEmailSender>());
+builder.Services.AddSingleton<ISendGridEmailSender>(sp => sp.GetRequiredService<SendGridEmailSender>());
+
+builder.Services.Configure<SendGridEmailSenderOptions>(o =>
+{
+    o.Key = builder.Configuration["SendGridKey"];
+    o.SenderEmail = builder.Configuration["SendGridSenderEmail"];
+    o.SenderName = builder.Configuration["SendGridSenderName"];
+});
+
 
 var app = builder.Build();
 

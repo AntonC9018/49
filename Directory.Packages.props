@@ -5,6 +5,7 @@
   <ItemGroup Label="Entity Framework and Authentication">
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="$(EF_ASP_VERSION)" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="$(EF_ASP_VERSION)" />
+    <PackageVersion Include="Microsoft.AspNetCore.Identity.UI" Version="$(EF_ASP_VERSION)" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="$(EF_ASP_VERSION)" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="$(EF_ASP_VERSION)" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="$(EF_ASP_VERSION)" />
@@ -41,6 +42,8 @@
     <PackageVersion Include="Yarp.ReverseProxy" Version="1.1.1" />
     <PackageVersion Include="Autofac" Version="6.5.0" />
     <PackageVersion Include="Autofac.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageVersion Include="SendGrid" Version="9.28.1" />
+    <PackageVersion Include="SendGrid.Extensions.DependencyInjection" Version="1.0.1" />
   </ItemGroup>
   <ItemGroup Label="Unit Testing">
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />

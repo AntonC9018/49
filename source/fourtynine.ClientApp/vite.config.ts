@@ -5,6 +5,7 @@ const vitePort = 5173;
 
 export default defineConfig({
     build: {
+        sourcemap: true,
         manifest: true,
         rollupOptions: {
             input: [
