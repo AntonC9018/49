@@ -9,7 +9,7 @@ public class PostingIndexPageModel : PageModel
     public long? PostingId { get; set; }
     
     // Initialized in OnGet
-    public PostingGetDto_Detailed Posting { get; set; } = null!;
+    public PostingGetDto_Detailed? Posting { get; set; }
     public string NewUrl { get; set; } = null!;
 
     private PostingApiService _api;
@@ -30,7 +30,8 @@ public class PostingIndexPageModel : PageModel
         
         var posting = await _api.GetDetailed(PostingId.Value);
         if (posting is null)
-            return RedirectToPage("/Error");
+            return Page();
+        
         Posting = posting;
 
         var slug = posting.General.Slug;

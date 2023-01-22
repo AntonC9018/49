@@ -7,8 +7,15 @@
 4. Run the build script in the root folder, which will install [Nuke](https://nuke.build/) and try to do a build.
 5. You need to set all secrets using `dotnet user-secrets` for in the folder `source/fourtynine` (see notes on why this is not shared automatically in the notes below):
   ```
-  dotnet user-secrets OAuthGithubClientId <github client id>
-  dotnet user-secrets OAuthGithubClientSecret <github client secret>
+  dotnet user-secrets set OAuthGithubClientId <github client id>
+  dotnet user-secrets set OAuthGithubClientSecret <github client secret>
+  
+  dotnet user-secrets set OAuthGoogleClientId <google client id>
+  dotnet user-secrets set OAuthGoogleClientSecret <google client secret>
+  
+  dotnet user-secrets set SendGridKey <sendgrid key>
+  dotnet user-secrets set SendGridSenderEmail <sendgrid sender email>
+  dotnet user-secrets set SendGridSenderName <sendgrid sender name>
   ```
 
 To build for production, do `build publish` (or `nuke publish`, which calls the same nuke target).
@@ -83,3 +90,5 @@ I'm sure in a real company on a real project this would not be a problem.
 Also, there are multiple authentication concepts for Azure Key Vault, not just Azure Active Directory, but also Managed Identity, RBAC, which I have not worked with and hence don't know which one I need to use if any.
 
 So, for the sake of progress, I'll fall back to storing the secrets locally with [the secret manager tool](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-7.0&tabs=windows#how-the-secret-manager-tool-works), so the secrets will either have to be shared on to the new machines, or generated again.
+
+[Setting up a JavaScript debugger in Rider](https://www.enkelmedia.se/blogg/2021/8/31/debugging-javascript-and-typescript-with-jetbrains-rider/) 

@@ -1,4 +1,5 @@
 ﻿using System;
+using JetBrains.Annotations;
 using Nuke.Common;
 using Nuke.Common.Tooling;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
@@ -36,6 +37,16 @@ partial class Build
             });
             DotNet(args.RenderForExecution());
         });
+        
+    Target RemoveMigration => _ => _
+        .Executes(() =>
+        {
+            var args = GetEntityFrameworkArguments(args =>
+            {
+                args.Add("migrations remove");
+            });
+            DotNet(args.RenderForExecution());
+        });
     
     Target UpdateDatabase => _ => _
         .Executes(() =>
@@ -43,6 +54,8 @@ partial class Build
             var args = GetEntityFrameworkArguments(args =>
             {
                 args.Add("database update");
+                if (MigrationName is not null)
+                    args.Add(MigrationName);
             });
             DotNet(args.RenderForExecution());
         });

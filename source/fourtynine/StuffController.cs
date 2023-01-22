@@ -12,7 +12,7 @@ public class StuffController : Controller
 {
     private readonly LinkGenerator _linkGenerator;
     private readonly ILogger _logger;
-
+    
     public StuffController(LinkGenerator linkGenerator, ILogger<StuffController> logger)
     {
         _linkGenerator = linkGenerator;

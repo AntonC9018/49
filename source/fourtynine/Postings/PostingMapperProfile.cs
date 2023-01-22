@@ -8,8 +8,10 @@ public class PostingMapperProfile : Profile
     public PostingMapperProfile()
     {
         ClearPrefixes();
-        
-        CreateMap<Author, PostingAuthorGetDto>(MemberList.Destination);
+
+        CreateMap<ApplicationUser, PostingAuthorGetDto>(MemberList.Destination)
+            .ForMember(d => d.Name, 
+                opt => opt.MapFrom(s => s.UserName));
         CreateMap<Posting, PostingGetDto_General>(MemberList.Destination)
             .ForMember(d => d.Slug, 
                 opt => opt.Ignore());

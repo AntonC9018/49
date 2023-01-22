@@ -1,20 +1,25 @@
 #if !USE_YARP
 using AspNetCore.Proxy;
 #endif
-using System.Net;
-using System.Security.Claims;
+using AspNet.Security.OAuth.GitHub;
 using FluentValidation;
 using fourtynine;
+using fourtynine.Authentication;
 using fourtynine.DataAccess;
 using fourtynine.Development;
 using fourtynine.Navbar;
 using fourtynine.Postings;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.OpenApi.Models;
 using Unchase.Swashbuckle.AspNetCore.Extensions.Extensions;
+using DbContext = fourtynine.DataAccess.DbContext;
+// ReSharper disable VariableHidesOuterVariable
 
 var builder = WebApplication.CreateBuilder(args);
 bool isDevelopment = builder.Environment.IsDevelopment();
@@ -48,7 +53,7 @@ if (isDevelopment)
     }
 }
 
-builder.Services.AddDbContext<PostingsDbContext>(options =>
+builder.Services.AddDbContext<DbContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("Postings");
     
@@ -94,6 +99,13 @@ builder.Services.AddSwaggerGen(options =>
         .Replace("Dto_", "")
         .Replace("Dto", ""));
     options.AddEnumsWithValuesFixFilters();
+   
+    // Doesn't actually seem to have an effect, might be a bug.
+    // The generated client still accepts nulls even if the properties aren't nullable.
+    // The MVC validation seems to rely on the nullability instead (since it has the
+    // SuppressImplicitRequiredAttributeForNonNullableReferenceTypes configuration property),
+    // hence by default the swagger schema doesn't reflect the actual API fully.
+    // options.SupportNonNullableReferenceTypes();
 });
 
 #if !USE_YARP
@@ -117,42 +129,32 @@ else
 
 builder.Services.AddScoped<PostingApiService>();
 
-builder.Services.AddAuthentication(defaultScheme: ProjectConfiguration.AuthCookieName)
-    .AddCookie(ProjectConfiguration.AuthCookieName, options =>
+builder.Services.AddIdentityCore<ApplicationUser>(options =>
     {
-        options.Cookie.Name = ProjectConfiguration.AuthCookieName;
-        options.Cookie.SameSite = SameSiteMode.Lax;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-        options.Cookie.HttpOnly = true;
-        options.LoginPath = "/Account/Login";
-        options.LogoutPath = "/Account/Logout";
-        
-        // Only redirect non-api requests.
-        options.Events.OnRedirectToLogin = context =>
-        {
-            if (context.Request.Path.StartsWithSegments("/api"))
-                context.Response.StatusCode = (int) HttpStatusCode.Unauthorized;
-            else
-                context.Response.Redirect(context.RedirectUri);
-
-            return Task.CompletedTask;
-        };
+        options.Password = null;
+        options.SignIn.RequireConfirmedAccount = true;
     })
-    .AddGitHub(options =>
-    {
-        options.SignInScheme = ProjectConfiguration.AuthCookieName;
-        options.CallbackPath = "/account/authorize/GitHub";
-        options.ClientId = builder.Configuration["OAuthGithubClientId"];
-        options.ClientSecret = builder.Configuration["OAuthGithubClientSecret"];
+    .AddEntityFrameworkStores<DbContext>()
+    .AddDefaultTokenProviders();
 
-        options.SaveTokens = true;
-        options.Scope.Add("read:user");
-        options.Events.OnCreatingTicket += context =>
-        {
-            context.MaybeAddAccessTokenClaim();
-            return Task.CompletedTask;
-        };
+builder.Services.AddScoped<UserProviderService>();
+{
+    var auth = builder.ConfigureAuthenticationSources();
+    auth.AddGithubAuthentication(builder.Configuration);
+    auth.AddGoogleAuthentication(builder.Configuration);
+
+    builder.Services.AddKeyed<IUserEmailConfirmationProvider>(options =>
+    {
+        options.Add<GithubEmailConfirmationProvider>(
+            GitHubAuthenticationDefaults.AuthenticationScheme, ServiceLifetime.Singleton);
+        options.Add<GoogleEmailConfirmationProvider>(
+            GoogleDefaults.AuthenticationScheme, ServiceLifetime.Singleton);
     });
+}
+
+builder.Services.AddAuthorization(options =>
+{
+});
 
 builder.Services.AddValidatorsFromAssembly(
     typeof(PostingCreateDtoValidator).Assembly,
@@ -168,10 +170,25 @@ builder.Services.AddFluentValidationRulesToSwagger();
 // https://github.com/sinanbozkus/FormHelper
 // builder.Services.AddFluentValidationClientsideAdapters();
 
+// register send grid email service
+builder.Services.AddSingleton<SendGridEmailSender>();
+builder.Services.AddSingleton<IEmailSender>(sp => sp.GetRequiredService<SendGridEmailSender>());
+builder.Services.AddSingleton<ISendGridEmailSender>(sp => sp.GetRequiredService<SendGridEmailSender>());
+
+builder.Services.Configure<SendGridEmailSenderOptions>(o =>
+{
+    o.Key = builder.Configuration["SendGridKey"];
+    o.SenderEmail = builder.Configuration["SendGridSenderEmail"];
+    o.SenderName = builder.Configuration["SendGridSenderName"];
+});
+
+builder.Services.AddHttpContextAccessor();
+
+
 var app = builder.Build();
 
 if (isDevelopment)
-    app.EnsureDatabaseCreated<PostingsDbContext>();
+    app.EnsureDatabaseCreated<DbContext>();
 
 // Configure the HTTP request pipeline.
 if (!isDevelopment)
@@ -215,10 +232,11 @@ app.UseEndpoints(endpoints =>
         endpoints.MapReverseProxy();
 #endif
     
-    endpoints.MapGet("/Account/Logout", async ctx =>
+    endpoints.MapGet("/Account/Logout", async context =>
     {
-        await ctx.SignOutAsync(
-            ProjectConfiguration.AuthCookieName,
+        var authSchemeUsed = AuthTokenSources.AuthCookieName;
+        await context.SignOutAsync(
+            authSchemeUsed,
             new AuthenticationProperties
             {
                 RedirectUri = "/"

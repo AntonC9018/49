@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using FluentValidation;
+using fourtynine.Authentication;
 using fourtynine.DataAccess;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using DbContext = fourtynine.DataAccess.DbContext;
 
 namespace fourtynine.Postings;
 
@@ -17,10 +19,10 @@ public sealed class SearchQuery
 // needed for the posting operations, like the mapper, validator, etc.
 public sealed class PostingApiService
 {
-    public PostingsDbContext DbContext { get; }
+    public DbContext DbContext { get; }
     public IMapper Mapper { get; }
 
-    public PostingApiService(PostingsDbContext dbContext, IMapper mapper)
+    public PostingApiService(DbContext dbContext, IMapper mapper)
     {
         DbContext = dbContext;
         Mapper = mapper;
@@ -124,7 +126,7 @@ public class PostingController : Controller
         return posting;
     }
     
-    [HttpGet("detailed/{id:long}")]
+    [HttpGet("detailed/{id:long}", Name = nameof(GetDetailed))]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<PostingGetDto_Detailed>> GetDetailed(int id)
@@ -150,17 +152,22 @@ public class PostingController : Controller
         PostingCreateDto postingDto, 
         [FromServices] IValidator<PostingCreateDto> validator)
     {
-        _logger.LogInformation("Creating posting {title}", postingDto.Title);
+        _logger.LogInformation("Creating posting {Title}", postingDto.Title);
 
         var validationResult = await validator.ValidateAsync(postingDto);
         if (!validationResult.IsValid)
             return BadRequest(validationResult.Errors);
         
-        var posting = await _api.Create(postingDto);
+        var posting = _api.Mapper.Map<Posting>(postingDto);
+        posting.AuthorId = User.GetId();
+        posting.DatePosted = DateTime.Now;
+
+        _api.DbContext.Postings.Add(posting);
+        await _api.DbContext.SaveChangesAsync();
+
         var dto = _api.Mapper.Map<PostingGetDto_Detailed>(posting);
         dto.General.InitializeSlug();
         
         return CreatedAtAction(nameof(GetDetailed), new { id = posting.Id }, dto);
     }
-    
 }

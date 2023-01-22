@@ -1,12 +1,5 @@
 ﻿using System.Diagnostics;
-using System.Net.Mime;
-using System.Security.Claims;
 using fourtynine.Navbar;
-using Microsoft.AspNetCore.Authentication.OAuth;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ApplicationModels;
-using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace fourtynine;
@@ -77,73 +70,5 @@ public static class RoutingHelper
     {
         string? page = (string?) view.RouteData.Values["page"];
         return page;
-    }
-}
-
-public sealed class ApiRoute : RouteAttribute
-{
-    public ApiRoute(string template = "api/[controller]") : base(template)
-    {
-    }
-}
-
-// Enables API conventions, like [ApiController],
-// while also applying the default content types.
-public sealed class ApiControllerConventionAttribute : Attribute,
-    IControllerModelConvention,
-    IApiBehaviorMetadata
-{
-    public void Apply(ControllerModel controller)
-    {
-        if (controller.Filters.All(f => f is not IResourceFilter))
-            controller.Filters.Add(new ConsumesAttribute(MediaTypeNames.Application.Json));
-        
-        if (controller.Filters.All(f => f is not IResultFilter))
-            controller.Filters.Add(new ProducesAttribute(MediaTypeNames.Application.Json));
-    }
-}
-
-
-// Not gonna work, because there is stuff in /public which doesn't end up in the manifest.
-// public class ViteManifestReverseProxyFilter : IProxyConfigFilter
-// {
-//     private HashSet<string> ManifestKeys;
-//     
-//     public ValueTask<ClusterConfig> ConfigureClusterAsync(ClusterConfig cluster, CancellationToken cancel)
-//     {
-//         return new(cluster);
-//     }
-//
-//     public ValueTask<RouteConfig> ConfigureRouteAsync(RouteConfig route, ClusterConfig? cluster, CancellationToken cancel)
-//     {
-//     }
-// } 
-
-public static class ClaimHelper
-{
-    public const string AccessTokenType = "access_token";
-    
-    public static Claim? MaybeAddAccessTokenClaim(this OAuthCreatingTicketContext context)
-    {
-        if (context.Identity is null)
-            return null;
-        
-        var accessToken = context.AccessToken;
-        if (accessToken is null)
-            return null;
-        
-        var claim = new Claim(AccessTokenType, accessToken);
-        context.Identity.AddClaim(claim);
-        return claim;
-    }
-    
-    public static string? GetAccessToken(this ClaimsPrincipal principal)
-    {
-        return principal.FindFirstValue(AccessTokenType);
-    }
-    
-    public static bool IsAccessToken(this Claim claim)
-    {
-        return claim.Type == AccessTokenType;
     }
 }

@@ -30,7 +30,7 @@ public class LogIn : PageModel
             var schemes = await GetSchemeProvider().GetAllSchemesAsync(); 
             Schemes = schemes
                 .Where(s => !string.IsNullOrEmpty(s.DisplayName))
-                .Select(s => new AuthSchemeInfo(s.Name, s.DisplayName ?? s.Name));
+                .Select(s => new AuthSchemeInfo(s.Name, s.DisplayName!));
             return Page();
         }
 

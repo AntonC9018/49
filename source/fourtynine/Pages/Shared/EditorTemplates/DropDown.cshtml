@@ -5,7 +5,7 @@
     var label = data.Label ?? ViewData.GetLabel();
 }
 
-<div class="form-group mb-6">
+<div class="mb-6">
     @Html.Label("", label, new
     {
         @class = @"
@@ -14,6 +14,8 @@
             text-gray-700",
     })
     
+    @await Html.PartialAsync("Shared/Partials/RequiredAsterisk")
+
     @* If we want to style it in a custom way, we have to do a div and list out the elements *@
     @* manually, + then a bunch of javascript would be needed too. *@
     @* This is also not dry, I've copy pasted the classes from String.cshtml, just changed the padding somewhat. *@
@@ -38,7 +40,7 @@
             focus:border-blue-600
             focus:outline-none",
     })
-    
+
     @Html.ValidationMessage("", new
     {
         @class = @"text-red-600",

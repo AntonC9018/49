@@ -25,7 +25,7 @@ public sealed class PostingDetailsDto
     public PricingPostingDetailsDto? Pricing { get; set; } 
     public LocationPostingDetailsDto? Location { get; set; }
     
-    public PostingKind Kind { get; set; }
+    [Required] public PostingKind Kind { get; set; }
     public RealEstatePostingDetailsDto? RealEstate { get; set; } 
     public VehiclePostingDetailsDto? Vehicle { get; set; } 
 }
@@ -188,7 +188,7 @@ public sealed class PostingGetDto_Detailed : IPostingIdentification
 
 public sealed class PostingAuthorGetDto
 {
-    [Required] public int Id { get; set; }
+    [Required] public Guid Id { get; set; }
     [Required] public string Name { get; set; }
     [Required] public string Email { get; set; }
 }
