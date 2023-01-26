@@ -1,9 +1,12 @@
 ﻿using AutoMapper;
+using AutoMapper.AspNet.OData;
 using AutoMapper.QueryableExtensions;
 using FluentValidation;
 using fourtynine.Authentication;
 using fourtynine.DataAccess;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
+using Microsoft.AspNetCore.OData.Routing.Attributes;
 using Microsoft.EntityFrameworkCore;
 using DbContext = fourtynine.DataAccess.DbContext;
 
@@ -169,5 +172,29 @@ public class PostingController : Controller
         dto.General.InitializeSlug();
         
         return CreatedAtAction(nameof(GetDetailed), new { id = posting.Id }, dto);
+    }
+    
+    private static readonly QuerySettings _QuerySettings = new QuerySettings
+    {
+        ODataSettings = new ODataSettings
+        {
+            PageSize = 100,
+            HandleNullPropagation = HandleNullPropagationOption.Default,
+        },
+    };
+    
+    [HttpGet("odata")]
+    [ODataAttributeRouting]
+    public async Task<ActionResult<ICollection<PostingGetDto_Detailed>>> GetMany(ODataQueryOptions<PostingGetDto_Detailed> queryOptions)
+    {
+        var config = new MapperConfiguration(cfg =>
+        {
+            cfg.AddProfile(ODataPostingMapperProfile.Instance);
+        });
+        var mapper = config.CreateMapper();
+        
+        var result = await _api.DbContext.Postings
+            .GetAsync(mapper, queryOptions, _QuerySettings);
+        return Ok(result);
     }
 }

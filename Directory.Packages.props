@@ -3,6 +3,7 @@
     <EF_ASP_VERSION>6.0.12</EF_ASP_VERSION>
   </PropertyGroup>
   <ItemGroup Label="Entity Framework and Authentication">
+    <PackageVersion Include="AutoMapper.AspNetCore.OData.EFCore" Version="4.0.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="$(EF_ASP_VERSION)" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="$(EF_ASP_VERSION)" />
     <PackageVersion Include="Microsoft.AspNetCore.Identity.UI" Version="$(EF_ASP_VERSION)" />
@@ -44,6 +45,7 @@
     <PackageVersion Include="Autofac.Extensions.DependencyInjection" Version="8.0.0" />
     <PackageVersion Include="SendGrid" Version="9.28.1" />
     <PackageVersion Include="SendGrid.Extensions.DependencyInjection" Version="1.0.1" />
+    <PackageVersion Include="Microsoft.AspNetCore.OData" Version="8.0.12" />
   </ItemGroup>
   <ItemGroup Label="Unit Testing">
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />

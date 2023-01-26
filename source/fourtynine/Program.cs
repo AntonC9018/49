@@ -14,8 +14,10 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.OData.ModelBuilder;
 using Microsoft.OpenApi.Models;
 using Unchase.Swashbuckle.AspNetCore.Extensions.Extensions;
 using DbContext = fourtynine.DataAccess.DbContext;
@@ -25,7 +27,7 @@ var builder = WebApplication.CreateBuilder(args);
 bool isDevelopment = builder.Environment.IsDevelopment();
 
 // Add services to the container.
-builder.Services.AddControllers(options =>
+var mvcBuilder = builder.Services.AddControllers(options =>
 {
 }).AddJsonOptions(options =>
 {
@@ -33,6 +35,18 @@ builder.Services.AddControllers(options =>
     options.JsonSerializerOptions.PropertyNamingPolicy = null;
     options.JsonSerializerOptions.DictionaryKeyPolicy = null;
 });
+
+{
+    var modelBuilder = new ODataConventionModelBuilder();
+    modelBuilder.EntitySet<Posting>("Postings");
+    modelBuilder.EntitySet<ApplicationUser>("Authors");
+    
+    mvcBuilder.AddOData(options =>
+    {
+        options.EnableQueryFeatures();
+        options.AddRouteComponents("Postings", modelBuilder.GetEdmModel());
+    });
+}
 
 #if USE_YARP
 if (isDevelopment)
@@ -69,7 +83,7 @@ builder.Services.AddDbContext<DbContext>(options =>
 
 builder.Services.AddAutoMapper(options =>
 {
-    options.AddProfile<PostingMapperProfile>();
+    options.AddProfile(PostingMapperProfile.Instance);
 });
 
 if (!isDevelopment)
