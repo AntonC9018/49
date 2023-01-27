@@ -2,6 +2,7 @@
 using AspNetCore.Proxy;
 #endif
 using AspNet.Security.OAuth.GitHub;
+using AutoMapper;
 using FluentValidation;
 using fourtynine;
 using fourtynine.Authentication;
@@ -14,9 +15,11 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Net.Http.Headers;
 using Microsoft.OData.ModelBuilder;
 using Microsoft.OpenApi.Models;
 using Unchase.Swashbuckle.AspNetCore.Extensions.Extensions;
@@ -34,6 +37,7 @@ var mvcBuilder = builder.Services.AddControllers(options =>
     // Keep the source casing.
     options.JsonSerializerOptions.PropertyNamingPolicy = null;
     options.JsonSerializerOptions.DictionaryKeyPolicy = null;
+    options.JsonSerializerOptions.WriteIndented = isDevelopment;
 });
 
 {
@@ -44,9 +48,30 @@ var mvcBuilder = builder.Services.AddControllers(options =>
     mvcBuilder.AddOData(options =>
     {
         options.EnableQueryFeatures();
-        options.AddRouteComponents("Postings", modelBuilder.GetEdmModel());
+        options.AddRouteComponents("api/Posting/odata", modelBuilder.GetEdmModel());
     });
 }
+
+// Swagger OData integration
+// https://shawn-shi.medium.com/clean-architecture-rest-api-with-odata-and-swagger-ui-406f7df896c
+mvcBuilder.AddMvcOptions(options =>
+{
+    var odataMediaType = new MediaTypeHeaderValue("application/prs.odatatestxx-odata");
+    
+    foreach (var outputFormatter in options.OutputFormatters
+        .OfType<OutputFormatter>()
+        .Where(x => x.SupportedMediaTypes.Count == 0))
+    {
+        outputFormatter.SupportedMediaTypes.Add(odataMediaType);
+    }
+
+    foreach (var inputFormatter in options.InputFormatters
+        .OfType<InputFormatter>()
+        .Where(x => x.SupportedMediaTypes.Count == 0))
+    {
+        inputFormatter.SupportedMediaTypes.Add(odataMediaType);
+    }
+});
 
 #if USE_YARP
 if (isDevelopment)
@@ -85,6 +110,20 @@ builder.Services.AddAutoMapper(options =>
 {
     options.AddProfile(PostingMapperProfile.Instance);
 });
+
+// I'm registering a separate mapper that's meant to be used for OData.
+// Might want to write some more code for better configuration
+// (basically copy-pasting some things from the automapper DI impl).
+builder.Services.AddSingleton<IODataMapperProvider>(sp =>
+{
+    var config = new MapperConfiguration(options =>
+    {
+        options.AddProfile(ODataPostingMapperProfile.Instance);
+    });
+    var mapper = config.CreateMapper(sp.GetService);
+    return new ODataMapperProvider(mapper);
+});
+
 
 if (!isDevelopment)
     builder.Services.AddDirectoryBrowser();

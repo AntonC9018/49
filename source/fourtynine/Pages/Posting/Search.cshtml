@@ -1,19 +1,20 @@
-﻿@page
-@model fourtynine.Postings.Search
+﻿@model fourtynine.Postings.PostingSearchPageModel
 
 @{
-    Layout = null;
+    ViewData["Title"] = "Searching";
 }
 
-<!DOCTYPE html>
+@if (Model.Exception is not null)
+{
+    <p>
+        There has been an error while processing your query: @Model.Exception.Message
+    </p>
+    return;
+}
 
-<html>
-<head>
-    <title></title>
-</head>
-<body>
-<div>
-    
-</div>
-</body>
-</html>
+@foreach (var posting in Model.Results!)
+{
+    <pre>
+        @Json.Serialize(posting)
+    </pre>
+}
