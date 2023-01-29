@@ -68,11 +68,14 @@ public class PostingController : Controller
         return CreatedAtAction(nameof(GetDetailed), new { id = posting.Id }, dto);
     }
     
-    [HttpGet("odata")]
     [ODataAttributeRouting]
+    [HttpGet("/odata/Postings")]
     public async Task<ActionResult<ICollection<PostingGetDto_Detailed>>> Get(
         ODataQueryOptions<PostingGetDto_Detailed> queryOptions)
     {
-        return Ok(await _api.GetODataQuery(queryOptions));
+        var result = await _api.GetODataQuery(queryOptions);
+        foreach (var r in result)
+            r.General.InitializeSlug();
+        return Ok(result);
     }
 }

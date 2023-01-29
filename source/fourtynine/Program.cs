@@ -42,13 +42,26 @@ var mvcBuilder = builder.Services.AddControllers(options =>
 
 {
     var modelBuilder = new ODataConventionModelBuilder();
-    modelBuilder.EntitySet<Posting>("Postings");
-    modelBuilder.EntitySet<ApplicationUser>("Authors");
+    modelBuilder.EntitySet<PostingGetDto_Detailed>("Postings");
+    modelBuilder.EntitySet<PostingAuthorGetDto>("Authors");
+    
+    // I wonder why this can't be deduced from the EF Core config?
+    // I should just need to say that these types are DTOs of the EF core entity types.
+    modelBuilder.EntityType<PostingGetDto_Detailed>()
+        .HasKey(a => a.Id);
+
+    modelBuilder.EntityType<PostingGetDto_Detailed>()
+        .HasOptional(a => a.Author);
+    
+    modelBuilder.EntityType<PostingAuthorGetDto>()
+        .HasKey(a => a.Id);
+
+    modelBuilder.ComplexType<PostingGetDto_General>();
     
     mvcBuilder.AddOData(options =>
     {
         options.EnableQueryFeatures();
-        options.AddRouteComponents("api/Posting/odata", modelBuilder.GetEdmModel());
+        options.AddRouteComponents("odata", modelBuilder.GetEdmModel());
     });
 }
 
@@ -265,6 +278,10 @@ if (!isDevelopment)
 
 app.UseHttpsRedirection();
 app.UseWebSockets();
+
+if (isDevelopment)
+    app.UseODataRouteDebug();
+
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();

@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
+using System.Runtime.Serialization;
 using FluentValidation;
 using fourtynine.DataAccess;
 
@@ -181,6 +182,15 @@ public sealed class PostingGetDto_Detailed : IPostingIdentification
     [Required] public List<string> PictureUrls { get; set; }
     [Required] public PostingAuthorGetDto Author { get; set; }
     [Required] public PostingDetailsDto Details { get; set; }
+
+    // Required for OData.
+    // https://github.com/OData/AspNetCoreOData/issues/828#issuecomment-1407541312
+    [IgnoreDataMember]
+    public long Id
+    {
+        get => General.Id;
+        set => (General ??= new()).Id = value;   
+    }
 
     long IPostingIdentification.Id => General.Id;
     string IPostingIdentification.Title => General.Title;
