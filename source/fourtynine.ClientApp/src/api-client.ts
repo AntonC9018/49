@@ -21,6 +21,80 @@ export class Client {
     /**
      * @return Success
      */
+    odata_$metadata(): Promise<OData_IEdmModel> {
+        let url_ = this.baseUrl + "/odata/$metadata";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json;odata.metadata=minimal;odata.streaming=true"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processOdata_$metadata(_response);
+        });
+    }
+
+    protected processOdata_$metadata(response: Response): Promise<OData_IEdmModel> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = OData_IEdmModel.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<OData_IEdmModel>(null as any);
+    }
+
+    /**
+     * @return Success
+     */
+    odata_(): Promise<OData_ODataServiceDocument> {
+        let url_ = this.baseUrl + "/odata";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json;odata.metadata=minimal;odata.streaming=true"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processOdata_(_response);
+        });
+    }
+
+    protected processOdata_(response: Response): Promise<OData_ODataServiceDocument> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = OData_ODataServiceDocument.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<OData_ODataServiceDocument>(null as any);
+    }
+
+    /**
+     * @return Success
+     */
     navbarActions(): Promise<INavbarAction[]> {
         let url_ = this.baseUrl + "/api/NavbarActions";
         url_ = url_.replace(/[?&]$/, "");
@@ -28,7 +102,7 @@ export class Client {
         let options_: RequestInit = {
             method: "GET",
             headers: {
-                "Accept": "application/json"
+                "Accept": "application/json;odata.metadata=minimal;odata.streaming=true"
             }
         };
 
@@ -75,7 +149,7 @@ export class Client {
         let options_: RequestInit = {
             method: "GET",
             headers: {
-                "Accept": "application/json"
+                "Accept": "application/json;odata.metadata=minimal;odata.streaming=true"
             }
         };
 
@@ -122,7 +196,7 @@ export class Client {
         let options_: RequestInit = {
             method: "GET",
             headers: {
-                "Accept": "application/json"
+                "Accept": "application/json;odata.metadata=minimal;odata.streaming=true"
             }
         };
 
@@ -157,67 +231,6 @@ export class Client {
     }
 
     /**
-     * @param count (optional) 
-     * @param startId (optional) 
-     * @return Success
-     */
-    postingAll(count: number | undefined, startId: number | undefined): Promise<PostingGetGeneral[]> {
-        let url_ = this.baseUrl + "/api/Posting?";
-        if (count === null)
-            throw new Error("The parameter 'count' cannot be null.");
-        else if (count !== undefined)
-            url_ += "Count=" + encodeURIComponent("" + count) + "&";
-        if (startId === null)
-            throw new Error("The parameter 'startId' cannot be null.");
-        else if (startId !== undefined)
-            url_ += "StartId=" + encodeURIComponent("" + startId) + "&";
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processPostingAll(_response);
-        });
-    }
-
-    protected processPostingAll(response: Response): Promise<PostingGetGeneral[]> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            if (Array.isArray(resultData200)) {
-                result200 = [] as any;
-                for (let item of resultData200)
-                    result200!.push(PostingGetGeneral.fromJS(item));
-            }
-            else {
-                result200 = <any>null;
-            }
-            return result200;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            let result400: any = null;
-            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result400 = ProblemDetails.fromJS(resultData400);
-            return throwException("Bad Request", status, _responseText, _headers, result400);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<PostingGetGeneral[]>(null as any);
-    }
-
-    /**
      * @param body (optional) 
      * @return Created
      */
@@ -231,8 +244,8 @@ export class Client {
             body: content_,
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
+                "Content-Type": "application/json;odata.metadata=minimal;odata.streaming=true",
+                "Accept": "application/json;odata.metadata=minimal;odata.streaming=true"
             }
         };
 
@@ -267,16 +280,21 @@ export class Client {
     }
 
     /**
+     * @param scheme (optional) 
      * @return Success
      */
-    refreshValidity(): Promise<boolean> {
-        let url_ = this.baseUrl + "/api/User/email/refresh-validity";
+    refreshValidity(scheme: string | undefined): Promise<boolean> {
+        let url_ = this.baseUrl + "/api/User/email/refresh-validity?";
+        if (scheme === null)
+            throw new Error("The parameter 'scheme' cannot be null.");
+        else if (scheme !== undefined)
+            url_ += "scheme=" + encodeURIComponent("" + scheme) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_: RequestInit = {
             method: "PATCH",
             headers: {
-                "Accept": "application/json"
+                "Accept": "application/json;odata.metadata=minimal;odata.streaming=true"
             }
         };
 
@@ -452,6 +470,829 @@ export interface ILocationPostingDetails {
     Longitude?: number | undefined;
 }
 
+/** 0 = None 1 = EntitySet 2 = ActionImport 3 = FunctionImport 4 = Singleton */
+export enum OData_EdmContainerElementKind {
+    None = 0,
+    EntitySet = 1,
+    ActionImport = 2,
+    FunctionImport = 3,
+    Singleton = 4,
+}
+
+/** 0 = None 1 = BinaryConstant 2 = BooleanConstant 3 = DateTimeOffsetConstant 4 = DecimalConstant 5 = FloatingConstant 6 = GuidConstant 7 = IntegerConstant 8 = StringConstant 9 = DurationConstant 10 = Null 11 = Record 12 = Collection 13 = Path 14 = If 15 = Cast 16 = IsType 17 = FunctionApplication 18 = LabeledExpressionReference 19 = Labeled 20 = PropertyPath 21 = NavigationPropertyPath 22 = DateConstant 23 = TimeOfDayConstant 24 = EnumMember 25 = AnnotationPath */
+export enum OData_EdmExpressionKind {
+    None = 0,
+    BinaryConstant = 1,
+    BooleanConstant = 2,
+    DateTimeOffsetConstant = 3,
+    DecimalConstant = 4,
+    FloatingConstant = 5,
+    GuidConstant = 6,
+    IntegerConstant = 7,
+    StringConstant = 8,
+    DurationConstant = 9,
+    Null = 10,
+    Record = 11,
+    Collection = 12,
+    Path = 13,
+    If = 14,
+    Cast = 15,
+    IsType = 16,
+    FunctionApplication = 17,
+    LabeledExpressionReference = 18,
+    Labeled = 19,
+    PropertyPath = 20,
+    NavigationPropertyPath = 21,
+    DateConstant = 22,
+    TimeOfDayConstant = 23,
+    EnumMember = 24,
+    AnnotationPath = 25,
+}
+
+/** 0 = None 1 = TypeDefinition 2 = Term 3 = Action 4 = EntityContainer 5 = Function */
+export enum OData_EdmSchemaElementKind {
+    None = 0,
+    TypeDefinition = 1,
+    Term = 2,
+    Action = 3,
+    EntityContainer = 4,
+    Function = 5,
+}
+
+/** 0 = None 1 = Primitive 2 = Entity 3 = Complex 4 = Collection 5 = EntityReference 6 = Enum 7 = TypeDefinition 8 = Untyped 9 = Path */
+export enum OData_EdmTypeKind {
+    None = 0,
+    Primitive = 1,
+    Entity = 2,
+    Complex = 3,
+    Collection = 4,
+    EntityReference = 5,
+    Enum = 6,
+    TypeDefinition = 7,
+    Untyped = 8,
+    Path = 9,
+}
+
+export class OData_IEdmDirectValueAnnotationsManager implements IOData_IEdmDirectValueAnnotationsManager {
+
+    constructor(data?: IOData_IEdmDirectValueAnnotationsManager) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+    }
+
+    static fromJS(data: any): OData_IEdmDirectValueAnnotationsManager {
+        data = typeof data === 'object' ? data : {};
+        let result = new OData_IEdmDirectValueAnnotationsManager();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        return data;
+    }
+}
+
+export interface IOData_IEdmDirectValueAnnotationsManager {
+}
+
+export class OData_IEdmEntityContainer implements IOData_IEdmEntityContainer {
+    readonly Elements?: OData_IEdmEntityContainerElement[] | undefined;
+    SchemaElementKind?: OData_EdmSchemaElementKind;
+    readonly Namespace?: string | undefined;
+    readonly Name?: string | undefined;
+
+    constructor(data?: IOData_IEdmEntityContainer) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["Elements"])) {
+                (<any>this).Elements = [] as any;
+                for (let item of _data["Elements"])
+                    (<any>this).Elements!.push(OData_IEdmEntityContainerElement.fromJS(item));
+            }
+            this.SchemaElementKind = _data["SchemaElementKind"];
+            (<any>this).Namespace = _data["Namespace"];
+            (<any>this).Name = _data["Name"];
+        }
+    }
+
+    static fromJS(data: any): OData_IEdmEntityContainer {
+        data = typeof data === 'object' ? data : {};
+        let result = new OData_IEdmEntityContainer();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.Elements)) {
+            data["Elements"] = [];
+            for (let item of this.Elements)
+                data["Elements"].push(item.toJSON());
+        }
+        data["SchemaElementKind"] = this.SchemaElementKind;
+        data["Namespace"] = this.Namespace;
+        data["Name"] = this.Name;
+        return data;
+    }
+}
+
+export interface IOData_IEdmEntityContainer {
+    Elements?: OData_IEdmEntityContainerElement[] | undefined;
+    SchemaElementKind?: OData_EdmSchemaElementKind;
+    Namespace?: string | undefined;
+    Name?: string | undefined;
+}
+
+export class OData_IEdmEntityContainerElement implements IOData_IEdmEntityContainerElement {
+    ContainerElementKind?: OData_EdmContainerElementKind;
+    Container?: OData_IEdmEntityContainer;
+    readonly Name?: string | undefined;
+
+    constructor(data?: IOData_IEdmEntityContainerElement) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.ContainerElementKind = _data["ContainerElementKind"];
+            this.Container = _data["Container"] ? OData_IEdmEntityContainer.fromJS(_data["Container"]) : <any>undefined;
+            (<any>this).Name = _data["Name"];
+        }
+    }
+
+    static fromJS(data: any): OData_IEdmEntityContainerElement {
+        data = typeof data === 'object' ? data : {};
+        let result = new OData_IEdmEntityContainerElement();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["ContainerElementKind"] = this.ContainerElementKind;
+        data["Container"] = this.Container ? this.Container.toJSON() : <any>undefined;
+        data["Name"] = this.Name;
+        return data;
+    }
+}
+
+export interface IOData_IEdmEntityContainerElement {
+    ContainerElementKind?: OData_EdmContainerElementKind;
+    Container?: OData_IEdmEntityContainer;
+    Name?: string | undefined;
+}
+
+export class OData_IEdmExpression implements IOData_IEdmExpression {
+    ExpressionKind?: OData_EdmExpressionKind;
+
+    constructor(data?: IOData_IEdmExpression) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.ExpressionKind = _data["ExpressionKind"];
+        }
+    }
+
+    static fromJS(data: any): OData_IEdmExpression {
+        data = typeof data === 'object' ? data : {};
+        let result = new OData_IEdmExpression();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["ExpressionKind"] = this.ExpressionKind;
+        return data;
+    }
+}
+
+export interface IOData_IEdmExpression {
+    ExpressionKind?: OData_EdmExpressionKind;
+}
+
+export class OData_IEdmModel implements IOData_IEdmModel {
+    readonly SchemaElements?: OData_IEdmSchemaElement[] | undefined;
+    readonly VocabularyAnnotations?: OData_IEdmVocabularyAnnotation[] | undefined;
+    readonly ReferencedModels?: OData_IEdmModel[] | undefined;
+    readonly DeclaredNamespaces?: string[] | undefined;
+    DirectValueAnnotationsManager?: OData_IEdmDirectValueAnnotationsManager;
+    EntityContainer?: OData_IEdmEntityContainer;
+
+    constructor(data?: IOData_IEdmModel) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["SchemaElements"])) {
+                (<any>this).SchemaElements = [] as any;
+                for (let item of _data["SchemaElements"])
+                    (<any>this).SchemaElements!.push(OData_IEdmSchemaElement.fromJS(item));
+            }
+            if (Array.isArray(_data["VocabularyAnnotations"])) {
+                (<any>this).VocabularyAnnotations = [] as any;
+                for (let item of _data["VocabularyAnnotations"])
+                    (<any>this).VocabularyAnnotations!.push(OData_IEdmVocabularyAnnotation.fromJS(item));
+            }
+            if (Array.isArray(_data["ReferencedModels"])) {
+                (<any>this).ReferencedModels = [] as any;
+                for (let item of _data["ReferencedModels"])
+                    (<any>this).ReferencedModels!.push(OData_IEdmModel.fromJS(item));
+            }
+            if (Array.isArray(_data["DeclaredNamespaces"])) {
+                (<any>this).DeclaredNamespaces = [] as any;
+                for (let item of _data["DeclaredNamespaces"])
+                    (<any>this).DeclaredNamespaces!.push(item);
+            }
+            this.DirectValueAnnotationsManager = _data["DirectValueAnnotationsManager"] ? OData_IEdmDirectValueAnnotationsManager.fromJS(_data["DirectValueAnnotationsManager"]) : <any>undefined;
+            this.EntityContainer = _data["EntityContainer"] ? OData_IEdmEntityContainer.fromJS(_data["EntityContainer"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): OData_IEdmModel {
+        data = typeof data === 'object' ? data : {};
+        let result = new OData_IEdmModel();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.SchemaElements)) {
+            data["SchemaElements"] = [];
+            for (let item of this.SchemaElements)
+                data["SchemaElements"].push(item.toJSON());
+        }
+        if (Array.isArray(this.VocabularyAnnotations)) {
+            data["VocabularyAnnotations"] = [];
+            for (let item of this.VocabularyAnnotations)
+                data["VocabularyAnnotations"].push(item.toJSON());
+        }
+        if (Array.isArray(this.ReferencedModels)) {
+            data["ReferencedModels"] = [];
+            for (let item of this.ReferencedModels)
+                data["ReferencedModels"].push(item.toJSON());
+        }
+        if (Array.isArray(this.DeclaredNamespaces)) {
+            data["DeclaredNamespaces"] = [];
+            for (let item of this.DeclaredNamespaces)
+                data["DeclaredNamespaces"].push(item);
+        }
+        data["DirectValueAnnotationsManager"] = this.DirectValueAnnotationsManager ? this.DirectValueAnnotationsManager.toJSON() : <any>undefined;
+        data["EntityContainer"] = this.EntityContainer ? this.EntityContainer.toJSON() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IOData_IEdmModel {
+    SchemaElements?: OData_IEdmSchemaElement[] | undefined;
+    VocabularyAnnotations?: OData_IEdmVocabularyAnnotation[] | undefined;
+    ReferencedModels?: OData_IEdmModel[] | undefined;
+    DeclaredNamespaces?: string[] | undefined;
+    DirectValueAnnotationsManager?: OData_IEdmDirectValueAnnotationsManager;
+    EntityContainer?: OData_IEdmEntityContainer;
+}
+
+export class OData_IEdmSchemaElement implements IOData_IEdmSchemaElement {
+    SchemaElementKind?: OData_EdmSchemaElementKind;
+    readonly Namespace?: string | undefined;
+    readonly Name?: string | undefined;
+
+    constructor(data?: IOData_IEdmSchemaElement) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.SchemaElementKind = _data["SchemaElementKind"];
+            (<any>this).Namespace = _data["Namespace"];
+            (<any>this).Name = _data["Name"];
+        }
+    }
+
+    static fromJS(data: any): OData_IEdmSchemaElement {
+        data = typeof data === 'object' ? data : {};
+        let result = new OData_IEdmSchemaElement();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["SchemaElementKind"] = this.SchemaElementKind;
+        data["Namespace"] = this.Namespace;
+        data["Name"] = this.Name;
+        return data;
+    }
+}
+
+export interface IOData_IEdmSchemaElement {
+    SchemaElementKind?: OData_EdmSchemaElementKind;
+    Namespace?: string | undefined;
+    Name?: string | undefined;
+}
+
+export class OData_IEdmTerm implements IOData_IEdmTerm {
+    Type?: OData_IEdmTypeReference;
+    readonly AppliesTo?: string | undefined;
+    readonly DefaultValue?: string | undefined;
+    SchemaElementKind?: OData_EdmSchemaElementKind;
+    readonly Namespace?: string | undefined;
+    readonly Name?: string | undefined;
+
+    constructor(data?: IOData_IEdmTerm) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.Type = _data["Type"] ? OData_IEdmTypeReference.fromJS(_data["Type"]) : <any>undefined;
+            (<any>this).AppliesTo = _data["AppliesTo"];
+            (<any>this).DefaultValue = _data["DefaultValue"];
+            this.SchemaElementKind = _data["SchemaElementKind"];
+            (<any>this).Namespace = _data["Namespace"];
+            (<any>this).Name = _data["Name"];
+        }
+    }
+
+    static fromJS(data: any): OData_IEdmTerm {
+        data = typeof data === 'object' ? data : {};
+        let result = new OData_IEdmTerm();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["Type"] = this.Type ? this.Type.toJSON() : <any>undefined;
+        data["AppliesTo"] = this.AppliesTo;
+        data["DefaultValue"] = this.DefaultValue;
+        data["SchemaElementKind"] = this.SchemaElementKind;
+        data["Namespace"] = this.Namespace;
+        data["Name"] = this.Name;
+        return data;
+    }
+}
+
+export interface IOData_IEdmTerm {
+    Type?: OData_IEdmTypeReference;
+    AppliesTo?: string | undefined;
+    DefaultValue?: string | undefined;
+    SchemaElementKind?: OData_EdmSchemaElementKind;
+    Namespace?: string | undefined;
+    Name?: string | undefined;
+}
+
+export class OData_IEdmType implements IOData_IEdmType {
+    TypeKind?: OData_EdmTypeKind;
+
+    constructor(data?: IOData_IEdmType) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.TypeKind = _data["TypeKind"];
+        }
+    }
+
+    static fromJS(data: any): OData_IEdmType {
+        data = typeof data === 'object' ? data : {};
+        let result = new OData_IEdmType();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["TypeKind"] = this.TypeKind;
+        return data;
+    }
+}
+
+export interface IOData_IEdmType {
+    TypeKind?: OData_EdmTypeKind;
+}
+
+export class OData_IEdmTypeReference implements IOData_IEdmTypeReference {
+    readonly IsNullable?: boolean;
+    Definition?: OData_IEdmType;
+
+    constructor(data?: IOData_IEdmTypeReference) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            (<any>this).IsNullable = _data["IsNullable"];
+            this.Definition = _data["Definition"] ? OData_IEdmType.fromJS(_data["Definition"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): OData_IEdmTypeReference {
+        data = typeof data === 'object' ? data : {};
+        let result = new OData_IEdmTypeReference();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["IsNullable"] = this.IsNullable;
+        data["Definition"] = this.Definition ? this.Definition.toJSON() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IOData_IEdmTypeReference {
+    IsNullable?: boolean;
+    Definition?: OData_IEdmType;
+}
+
+export class OData_IEdmVocabularyAnnotatable implements IOData_IEdmVocabularyAnnotatable {
+
+    constructor(data?: IOData_IEdmVocabularyAnnotatable) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+    }
+
+    static fromJS(data: any): OData_IEdmVocabularyAnnotatable {
+        data = typeof data === 'object' ? data : {};
+        let result = new OData_IEdmVocabularyAnnotatable();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        return data;
+    }
+}
+
+export interface IOData_IEdmVocabularyAnnotatable {
+}
+
+export class OData_IEdmVocabularyAnnotation implements IOData_IEdmVocabularyAnnotation {
+    readonly Qualifier?: string | undefined;
+    Term?: OData_IEdmTerm;
+    Target?: OData_IEdmVocabularyAnnotatable;
+    Value?: OData_IEdmExpression;
+
+    constructor(data?: IOData_IEdmVocabularyAnnotation) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            (<any>this).Qualifier = _data["Qualifier"];
+            this.Term = _data["Term"] ? OData_IEdmTerm.fromJS(_data["Term"]) : <any>undefined;
+            this.Target = _data["Target"] ? OData_IEdmVocabularyAnnotatable.fromJS(_data["Target"]) : <any>undefined;
+            this.Value = _data["Value"] ? OData_IEdmExpression.fromJS(_data["Value"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): OData_IEdmVocabularyAnnotation {
+        data = typeof data === 'object' ? data : {};
+        let result = new OData_IEdmVocabularyAnnotation();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["Qualifier"] = this.Qualifier;
+        data["Term"] = this.Term ? this.Term.toJSON() : <any>undefined;
+        data["Target"] = this.Target ? this.Target.toJSON() : <any>undefined;
+        data["Value"] = this.Value ? this.Value.toJSON() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IOData_IEdmVocabularyAnnotation {
+    Qualifier?: string | undefined;
+    Term?: OData_IEdmTerm;
+    Target?: OData_IEdmVocabularyAnnotatable;
+    Value?: OData_IEdmExpression;
+}
+
+export class OData_ODataEntitySetInfo implements IOData_ODataEntitySetInfo {
+    TypeAnnotation?: OData_ODataTypeAnnotation;
+    Url?: string | undefined;
+    Name?: string | undefined;
+    Title?: string | undefined;
+
+    constructor(data?: IOData_ODataEntitySetInfo) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.TypeAnnotation = _data["TypeAnnotation"] ? OData_ODataTypeAnnotation.fromJS(_data["TypeAnnotation"]) : <any>undefined;
+            this.Url = _data["Url"];
+            this.Name = _data["Name"];
+            this.Title = _data["Title"];
+        }
+    }
+
+    static fromJS(data: any): OData_ODataEntitySetInfo {
+        data = typeof data === 'object' ? data : {};
+        let result = new OData_ODataEntitySetInfo();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["TypeAnnotation"] = this.TypeAnnotation ? this.TypeAnnotation.toJSON() : <any>undefined;
+        data["Url"] = this.Url;
+        data["Name"] = this.Name;
+        data["Title"] = this.Title;
+        return data;
+    }
+}
+
+export interface IOData_ODataEntitySetInfo {
+    TypeAnnotation?: OData_ODataTypeAnnotation;
+    Url?: string | undefined;
+    Name?: string | undefined;
+    Title?: string | undefined;
+}
+
+export class OData_ODataFunctionImportInfo implements IOData_ODataFunctionImportInfo {
+    TypeAnnotation?: OData_ODataTypeAnnotation;
+    Url?: string | undefined;
+    Name?: string | undefined;
+    Title?: string | undefined;
+
+    constructor(data?: IOData_ODataFunctionImportInfo) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.TypeAnnotation = _data["TypeAnnotation"] ? OData_ODataTypeAnnotation.fromJS(_data["TypeAnnotation"]) : <any>undefined;
+            this.Url = _data["Url"];
+            this.Name = _data["Name"];
+            this.Title = _data["Title"];
+        }
+    }
+
+    static fromJS(data: any): OData_ODataFunctionImportInfo {
+        data = typeof data === 'object' ? data : {};
+        let result = new OData_ODataFunctionImportInfo();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["TypeAnnotation"] = this.TypeAnnotation ? this.TypeAnnotation.toJSON() : <any>undefined;
+        data["Url"] = this.Url;
+        data["Name"] = this.Name;
+        data["Title"] = this.Title;
+        return data;
+    }
+}
+
+export interface IOData_ODataFunctionImportInfo {
+    TypeAnnotation?: OData_ODataTypeAnnotation;
+    Url?: string | undefined;
+    Name?: string | undefined;
+    Title?: string | undefined;
+}
+
+export class OData_ODataServiceDocument implements IOData_ODataServiceDocument {
+    TypeAnnotation?: OData_ODataTypeAnnotation;
+    EntitySets?: OData_ODataEntitySetInfo[] | undefined;
+    Singletons?: OData_ODataSingletonInfo[] | undefined;
+    FunctionImports?: OData_ODataFunctionImportInfo[] | undefined;
+
+    constructor(data?: IOData_ODataServiceDocument) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.TypeAnnotation = _data["TypeAnnotation"] ? OData_ODataTypeAnnotation.fromJS(_data["TypeAnnotation"]) : <any>undefined;
+            if (Array.isArray(_data["EntitySets"])) {
+                this.EntitySets = [] as any;
+                for (let item of _data["EntitySets"])
+                    this.EntitySets!.push(OData_ODataEntitySetInfo.fromJS(item));
+            }
+            if (Array.isArray(_data["Singletons"])) {
+                this.Singletons = [] as any;
+                for (let item of _data["Singletons"])
+                    this.Singletons!.push(OData_ODataSingletonInfo.fromJS(item));
+            }
+            if (Array.isArray(_data["FunctionImports"])) {
+                this.FunctionImports = [] as any;
+                for (let item of _data["FunctionImports"])
+                    this.FunctionImports!.push(OData_ODataFunctionImportInfo.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): OData_ODataServiceDocument {
+        data = typeof data === 'object' ? data : {};
+        let result = new OData_ODataServiceDocument();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["TypeAnnotation"] = this.TypeAnnotation ? this.TypeAnnotation.toJSON() : <any>undefined;
+        if (Array.isArray(this.EntitySets)) {
+            data["EntitySets"] = [];
+            for (let item of this.EntitySets)
+                data["EntitySets"].push(item.toJSON());
+        }
+        if (Array.isArray(this.Singletons)) {
+            data["Singletons"] = [];
+            for (let item of this.Singletons)
+                data["Singletons"].push(item.toJSON());
+        }
+        if (Array.isArray(this.FunctionImports)) {
+            data["FunctionImports"] = [];
+            for (let item of this.FunctionImports)
+                data["FunctionImports"].push(item.toJSON());
+        }
+        return data;
+    }
+}
+
+export interface IOData_ODataServiceDocument {
+    TypeAnnotation?: OData_ODataTypeAnnotation;
+    EntitySets?: OData_ODataEntitySetInfo[] | undefined;
+    Singletons?: OData_ODataSingletonInfo[] | undefined;
+    FunctionImports?: OData_ODataFunctionImportInfo[] | undefined;
+}
+
+export class OData_ODataSingletonInfo implements IOData_ODataSingletonInfo {
+    TypeAnnotation?: OData_ODataTypeAnnotation;
+    Url?: string | undefined;
+    Name?: string | undefined;
+    Title?: string | undefined;
+
+    constructor(data?: IOData_ODataSingletonInfo) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.TypeAnnotation = _data["TypeAnnotation"] ? OData_ODataTypeAnnotation.fromJS(_data["TypeAnnotation"]) : <any>undefined;
+            this.Url = _data["Url"];
+            this.Name = _data["Name"];
+            this.Title = _data["Title"];
+        }
+    }
+
+    static fromJS(data: any): OData_ODataSingletonInfo {
+        data = typeof data === 'object' ? data : {};
+        let result = new OData_ODataSingletonInfo();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["TypeAnnotation"] = this.TypeAnnotation ? this.TypeAnnotation.toJSON() : <any>undefined;
+        data["Url"] = this.Url;
+        data["Name"] = this.Name;
+        data["Title"] = this.Title;
+        return data;
+    }
+}
+
+export interface IOData_ODataSingletonInfo {
+    TypeAnnotation?: OData_ODataTypeAnnotation;
+    Url?: string | undefined;
+    Name?: string | undefined;
+    Title?: string | undefined;
+}
+
+export class OData_ODataTypeAnnotation implements IOData_ODataTypeAnnotation {
+    readonly TypeName?: string | undefined;
+
+    constructor(data?: IOData_ODataTypeAnnotation) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            (<any>this).TypeName = _data["TypeName"];
+        }
+    }
+
+    static fromJS(data: any): OData_ODataTypeAnnotation {
+        data = typeof data === 'object' ? data : {};
+        let result = new OData_ODataTypeAnnotation();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["TypeName"] = this.TypeName;
+        return data;
+    }
+}
+
+export interface IOData_ODataTypeAnnotation {
+    TypeName?: string | undefined;
+}
+
 export class PostingAuthorGet implements IPostingAuthorGet {
     Id!: string;
     Name!: string;
@@ -604,6 +1445,7 @@ export class PostingGetDetailed implements IPostingGetDetailed {
     PictureUrls!: string[];
     Author!: PostingAuthorGet;
     Details!: PostingDetails;
+    Id?: number;
 
     constructor(data?: IPostingGetDetailed) {
         if (data) {
@@ -630,6 +1472,7 @@ export class PostingGetDetailed implements IPostingGetDetailed {
             }
             this.Author = _data["Author"] ? PostingAuthorGet.fromJS(_data["Author"]) : new PostingAuthorGet();
             this.Details = _data["Details"] ? PostingDetails.fromJS(_data["Details"]) : new PostingDetails();
+            this.Id = _data["Id"];
         }
     }
 
@@ -650,6 +1493,7 @@ export class PostingGetDetailed implements IPostingGetDetailed {
         }
         data["Author"] = this.Author ? this.Author.toJSON() : <any>undefined;
         data["Details"] = this.Details ? this.Details.toJSON() : <any>undefined;
+        data["Id"] = this.Id;
         return data;
     }
 }
@@ -659,6 +1503,7 @@ export interface IPostingGetDetailed {
     PictureUrls: string[];
     Author: PostingAuthorGet;
     Details: PostingDetails;
+    Id?: number;
 }
 
 export class PostingGetGeneral implements IPostingGetGeneral {
@@ -986,6 +1831,93 @@ export const ApiPropertyTable = {
         { name: "Latitude", schemaTypeName: "number" },
         { name: "Longitude", schemaTypeName: "number" },
     ],
+    OData_EdmContainerElementKind: [
+    ],
+    OData_EdmExpressionKind: [
+    ],
+    OData_EdmSchemaElementKind: [
+    ],
+    OData_EdmTypeKind: [
+    ],
+    OData_IEdmDirectValueAnnotationsManager: [
+    ],
+    OData_IEdmEntityContainer: [
+        { name: "Elements", schemaTypeName: null },
+        { name: "SchemaElementKind", schemaTypeName: null },
+        { name: "Namespace", schemaTypeName: null },
+        { name: "Name", schemaTypeName: null },
+    ],
+    OData_IEdmEntityContainerElement: [
+        { name: "ContainerElementKind", schemaTypeName: null },
+        { name: "Container", schemaTypeName: "OData_IEdmEntityContainer" },
+        { name: "Name", schemaTypeName: null },
+    ],
+    OData_IEdmExpression: [
+        { name: "ExpressionKind", schemaTypeName: null },
+    ],
+    OData_IEdmModel: [
+        { name: "SchemaElements", schemaTypeName: null },
+        { name: "VocabularyAnnotations", schemaTypeName: null },
+        { name: "ReferencedModels", schemaTypeName: null },
+        { name: "DeclaredNamespaces", schemaTypeName: null },
+        { name: "DirectValueAnnotationsManager", schemaTypeName: "OData_IEdmDirectValueAnnotationsManager" },
+        { name: "EntityContainer", schemaTypeName: "OData_IEdmEntityContainer" },
+    ],
+    OData_IEdmSchemaElement: [
+        { name: "SchemaElementKind", schemaTypeName: null },
+        { name: "Namespace", schemaTypeName: null },
+        { name: "Name", schemaTypeName: null },
+    ],
+    OData_IEdmTerm: [
+        { name: "Type", schemaTypeName: "OData_IEdmTypeReference" },
+        { name: "AppliesTo", schemaTypeName: null },
+        { name: "DefaultValue", schemaTypeName: null },
+        { name: "SchemaElementKind", schemaTypeName: null },
+        { name: "Namespace", schemaTypeName: null },
+        { name: "Name", schemaTypeName: null },
+    ],
+    OData_IEdmType: [
+        { name: "TypeKind", schemaTypeName: null },
+    ],
+    OData_IEdmTypeReference: [
+        { name: "IsNullable", schemaTypeName: null },
+        { name: "Definition", schemaTypeName: "OData_IEdmType" },
+    ],
+    OData_IEdmVocabularyAnnotatable: [
+    ],
+    OData_IEdmVocabularyAnnotation: [
+        { name: "Qualifier", schemaTypeName: null },
+        { name: "Term", schemaTypeName: "OData_IEdmTerm" },
+        { name: "Target", schemaTypeName: "OData_IEdmVocabularyAnnotatable" },
+        { name: "Value", schemaTypeName: "OData_IEdmExpression" },
+    ],
+    OData_ODataEntitySetInfo: [
+        { name: "TypeAnnotation", schemaTypeName: "OData_ODataTypeAnnotation" },
+        { name: "Url", schemaTypeName: null },
+        { name: "Name", schemaTypeName: null },
+        { name: "Title", schemaTypeName: null },
+    ],
+    OData_ODataFunctionImportInfo: [
+        { name: "TypeAnnotation", schemaTypeName: "OData_ODataTypeAnnotation" },
+        { name: "Url", schemaTypeName: null },
+        { name: "Name", schemaTypeName: null },
+        { name: "Title", schemaTypeName: null },
+    ],
+    OData_ODataServiceDocument: [
+        { name: "TypeAnnotation", schemaTypeName: "OData_ODataTypeAnnotation" },
+        { name: "EntitySets", schemaTypeName: null },
+        { name: "Singletons", schemaTypeName: null },
+        { name: "FunctionImports", schemaTypeName: null },
+    ],
+    OData_ODataSingletonInfo: [
+        { name: "TypeAnnotation", schemaTypeName: "OData_ODataTypeAnnotation" },
+        { name: "Url", schemaTypeName: null },
+        { name: "Name", schemaTypeName: null },
+        { name: "Title", schemaTypeName: null },
+    ],
+    OData_ODataTypeAnnotation: [
+        { name: "TypeName", schemaTypeName: null },
+    ],
     PostingAuthorGet: [
         { name: "Id", schemaTypeName: null },
         { name: "Name", schemaTypeName: null },
@@ -1009,6 +1941,7 @@ export const ApiPropertyTable = {
         { name: "PictureUrls", schemaTypeName: null },
         { name: "Author", schemaTypeName: "PostingAuthorGet" },
         { name: "Details", schemaTypeName: "PostingDetails" },
+        { name: "Id", schemaTypeName: null },
     ],
     PostingGetGeneral: [
         { name: "Id", schemaTypeName: null },

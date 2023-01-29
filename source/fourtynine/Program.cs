@@ -84,6 +84,8 @@ mvcBuilder.AddMvcOptions(options =>
     {
         inputFormatter.SupportedMediaTypes.Add(odataMediaType);
     }
+    
+    options.Conventions.Add(HideODataRoutesConvention.Instance);
 });
 
 #if USE_YARP
@@ -161,7 +163,37 @@ builder.Services.AddSwaggerGen(options =>
             Url = new Uri("https://example.com/license")
         },
     });
-    options.CustomSchemaIds(t => t.Name
+
+    static string GetNameInternal(System.Type t)
+    {
+        if (t.IsArray)
+        {
+            var elementType = t.GetElementType()!;
+            return GetNameInternal(elementType) + "Array";
+        }
+        if (t.IsGenericType)
+        {
+            var types = t.GetGenericArguments();
+            var typeNames = types.Select(GetNameInternal);
+            var ownName = t.Name;
+            {
+                var numGenericArgsDelimiterIndex = ownName.LastIndexOf('`');
+                ownName = ownName[..numGenericArgsDelimiterIndex];
+            }
+            var names = new[] { ownName }.Concat(typeNames);
+            return string.Join("_", names);
+        }
+        return t.Name;
+    }
+
+    static string GetName(System.Type t)
+    {
+        if (t.Namespace?.Contains("Microsoft.OData") ?? false)
+            return "OData_" + GetNameInternal(t);
+        return GetNameInternal(t);
+    }
+    
+    options.CustomSchemaIds(t => GetName(t)
         .Replace("Dto_", "")
         .Replace("Dto", ""));
     options.AddEnumsWithValuesFixFilters();

@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.OData.Extensions;
+using Microsoft.AspNetCore.OData.Routing.Attributes;
 
 namespace fourtynine;
 
@@ -35,5 +37,15 @@ public sealed class ApiControllerConventionAttribute : Attribute,
         
         if (controller.Filters.All(f => f is not IResultFilter))
             controller.Filters.Add(new ProducesAttribute(MediaTypeNames.Application.Json));
+    }
+}
+
+public class HideODataRoutesConvention : IActionModelConvention
+{
+    public static readonly HideODataRoutesConvention Instance = new();
+    public void Apply(ActionModel action)
+    {
+        if (action.Attributes.Any(t => t is ODataAttributeRoutingAttribute))
+            action.ApiExplorer.IsVisible = false;
     }
 }
